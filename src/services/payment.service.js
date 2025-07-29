@@ -76,32 +76,20 @@ export const completePayment = async (paymentMethodId, paymentIntentId, userId, 
 
 
 
-
-
-
-
-
-
-
 // Fetch payment history of a user
 export const getPaymentHistory = async (userId) => {
-  if (!userId) {
-    throw new Error("User ID is required to fetch payment history.");
-  }
+  if (!userId) throw new Error("User ID is required");
 
   try {
-    // Convert the userId to ObjectId
-    const userObjectId = mongoose.Types.ObjectId(userId);  // Ensure userId is ObjectId
-
     const response = await axios.get(
-      `http://localhost:5000/api/payments?userId=${userObjectId}`,
+      `http://localhost:5000/api/payments?userId=${userId}`,
       await getAuthHeader()
     );
-
     return response.data;
   } catch (error) {
     console.error("Error fetching payment history:", error);
     throw new Error("Failed to fetch payment history");
   }
 };
+
 

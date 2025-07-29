@@ -1,28 +1,55 @@
 // layouts/DashboardLayout.jsx
-import React from "react";
+import React, { useState } from "react";
 import Navbar from "../components/Navbar/Navbar.jsx";
-import Sidebar from "../components/Sidebar/Sidebar";
+import Sidebar from "../components/Sidebar/Sidebar.jsx";
 import Footer from "../components/Footer/Footer.jsx";
-import { Outlet } from "react-router-dom";  // Used for rendering nested routes
+import { Outlet } from "react-router-dom";
 
 const DashboardLayout = () => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="flex flex-col min-h-screen bg-gray-600">
+    <div className="bg-gray-600 text-white min-h-screen">
       {/* Navbar */}
-      <Navbar />
+      <header className="fixed top-0 left-0 right-0 z-50 bg-gray-800 shadow">
+        <Navbar
+          menuOpen={sidebarOpen}
+          setMenuOpen={setSidebarOpen}
+          isDashboard={true}
+        />
+      </header>
 
-      <div className="flex flex-1 mt-16 ">
+      {/* Sidebar overlay on mobile */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Layout Container */}
+      <div className="pt-16 flex">
         {/* Sidebar */}
-        <Sidebar />
+        <aside
+          className={` 
+            w-64 bg-gray-800 shadow-md z-40
+            transform transition-transform duration-300 ease-in-out
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
+            fixed top-16 bottom-0 overflow-y-auto
+            md:translate-x-0 md:relative md:top-0 md:flex-shrink-0
+            h-[calc(100vh-4rem)]
+          `}
+        >
+          <Sidebar closeSidebar={() => setSidebarOpen(false)} />
+        </aside>
 
-        {/* Main content */}
-        <div className="flex-1 p-4">
-          <Outlet />  {/* This will render pages like MyTasks, Profile, etc. */}
-        </div>
+        {/* Main Content */}
+        <main
+          className="flex-1 ml-0   h-[calc(100vh-4rem)] overflow-y-auto p-4"
+        >
+          <Outlet />
+        </main>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 };

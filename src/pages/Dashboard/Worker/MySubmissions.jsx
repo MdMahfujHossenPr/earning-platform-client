@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { getPendingSubmissions, approveSubmission, rejectSubmission } from "../../../services/submission.service";  // Import the service functions
+import { getPendingSubmissions } from "../../../services/submission.service";  // Import the service function
 import { showToast } from "../../../utils/showToast";  // Custom toast function
 
 const MySubmissions = () => {
@@ -60,34 +60,6 @@ const MySubmissions = () => {
     );
   }
 
-  // Handle approve submission
-  const handleApprove = async (submissionId, workerEmail, payableAmount) => {
-    try {
-      const response = await approveSubmission(submissionId, workerEmail, payableAmount);
-      if (response.success) {
-        showToast("Submission approved successfully", "success");
-        // Refetch pending submissions after approval
-        await fetchSubmissions();
-      }
-    } catch (error) {
-      showToast("Failed to approve submission", "error");
-    }
-  };
-
-  // Handle reject submission
-  const handleReject = async (submissionId, taskId) => {
-    try {
-      const response = await rejectSubmission(submissionId, taskId);
-      if (response.success) {
-        showToast("Submission rejected successfully", "success");
-        // Refetch pending submissions after rejection
-        await fetchSubmissions();
-      }
-    } catch (error) {
-      showToast("Failed to reject submission", "error");
-    }
-  };
-
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-4">My Submissions</h2>
@@ -107,7 +79,6 @@ const MySubmissions = () => {
                 <th className="px-4 py-2 text-left">Submission Date</th>
                 <th className="px-4 py-2 text-left">Worker Name</th>
                 <th className="px-4 py-2 text-left">Submission Details</th>
-                <th className="px-4 py-2 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +100,17 @@ const MySubmissions = () => {
                       <td className="px-4 py-2">{sub.task_title}</td>
                       <td className="px-4 py-2">{sub.payable_amount}</td>
                       <td className="px-4 py-2">{sub.buyer_name || "No buyer"}</td>
-                      <td className="px-4 py-2">{sub.status}</td>
+                      <td className="px-4 py-2">
+                        {sub.status === "pending" && (
+                          <span className="text-yellow-500 font-semibold">Pending</span>
+                        )}
+                        {sub.status === "approved" && (
+                          <span className="text-green-500 font-semibold">Approved</span>
+                        )}
+                        {sub.status === "rejected" && (
+                          <span className="text-red-500 font-semibold">Rejected</span>
+                        )}
+                      </td>
                       <td className="px-4 py-2">
                         {sub.createdAt
                           ? new Date(sub.createdAt).toLocaleDateString("en-US", {
@@ -141,24 +122,6 @@ const MySubmissions = () => {
                       </td>
                       <td className="px-4 py-2">{sub.worker_name || "No worker name"}</td>
                       <td className="px-4 py-2">{sub.submission_details || "No details available"}</td>
-                      <td className="px-4 py-2">
-                        {sub.status === "pending" && (
-                          <>
-                            <button
-                              onClick={() => handleApprove(sub._id, sub.worker_email, sub.payable_amount)}
-                              className="bg-green-500 text-white px-3 py-1 rounded mr-2"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() => handleReject(sub._id, sub.task_id)}
-                              className="bg-red-500 text-white px-3 py-1 rounded"
-                            >
-                              Reject
-                            </button>
-                          </>
-                        )}
-                      </td>
                     </tr>
                   );
                 })}

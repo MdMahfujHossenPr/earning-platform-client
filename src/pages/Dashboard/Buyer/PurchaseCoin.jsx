@@ -2,15 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
 import { showToast } from "../../../utils/showToast";
 import { createPaymentIntent, completePayment } from "../../../services/payment.service"; 
-import { useAuth } from "../../../context/AuthContext";  // Importing the useAuth hook
+import { useAuth } from "../../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const PurchaseCoin = () => {
   const stripe = useStripe();
   const elements = useElements();
   const navigate = useNavigate();
-  
-  const { user } = useAuth();  // Using the useAuth hook to get the current user
+
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [clientSecret, setClientSecret] = useState(null);
@@ -27,8 +27,7 @@ const PurchaseCoin = () => {
 
   useEffect(() => {
     if (user) {
-      setUserId(user.uid);  // Firebase UID from useAuth context
-      console.log("Firebase UID:", user.uid);
+      setUserId(user.uid);
     } else {
       console.error("User is not authenticated");
     }
@@ -83,16 +82,17 @@ const PurchaseCoin = () => {
       }
 
       if (paymentIntent.status === "succeeded") {
-        // Pass the necessary data to the backend
+        // Backend call to save payment record
         await completePayment(paymentMethod.id, paymentIntent.id, userId, selectedCoin.coins);
-        navigate("/dashboard/worker-home");
+        showToast("Payment successful!", "success");
+        navigate("/dashboard/buyer/payment-history");  // এখানে রিডাইরেক্ট
       } else {
         setError("Payment failed. Please try again.");
       }
     } catch (error) {
       setError("Payment failed. Please try again.");
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (
@@ -102,7 +102,9 @@ const PurchaseCoin = () => {
         {coinOptions.map((coinOption, index) => (
           <div
             key={index}
-            className={`coin-card cursor-pointer bg-gray-100 rounded-lg p-4 hover:bg-gray-200 transition duration-200 ease-in-out ${selectedCoin && selectedCoin.coins === coinOption.coins ? "border-2 border-blue-500" : ""}`}
+            className={`coin-card cursor-pointer bg-gray-100 rounded-lg p-4 hover:bg-gray-200 transition duration-200 ease-in-out ${
+              selectedCoin && selectedCoin.coins === coinOption.coins ? "border-2 border-blue-500" : ""
+            }`}
             onClick={() => handlePayment(coinOption)}
           >
             <h3 className="text-lg font-bold text-gray-800">{coinOption.coins} Coins</h3>
@@ -114,7 +116,13 @@ const PurchaseCoin = () => {
       {clientSecret && (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="mb-4">
-            <CardElement options={{ style: { base: { fontSize: '16px', color: '#424770', letterSpacing: '0.025em' }}}}/>
+            <CardElement
+              options={{
+                style: {
+                  base: { fontSize: "16px", color: "#424770", letterSpacing: "0.025em" },
+                },
+              }}
+            />
           </div>
           {error && <div className="text-red-500">{error}</div>}
           <button
@@ -127,7 +135,7 @@ const PurchaseCoin = () => {
         </form>
       )}
 
-      {loading && <div className="loading text-center text-gray-600 mt-4">Processing...</div>}
+      {loading && !clientSecret && <div className="loading text-center text-gray-600 mt-4">Processing...</div>}
     </div>
   );
 };

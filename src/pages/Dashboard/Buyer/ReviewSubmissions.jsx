@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import * as axios from "../../../services/axios";
+import { getPendingSubmissions, approveSubmission, rejectSubmission } from "../../../services/submission.service";
+import { getAuth } from "firebase/auth";
 
 const ReviewSubmissions = () => {
   const [submissions, setSubmissions] = useState([]);
@@ -8,29 +9,56 @@ const ReviewSubmissions = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    async function fetchSubmissions() {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("/api/submissions");
-        setSubmissions(res.data.filter((s) => s.status === "pending"));
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
+        const userId = currentUser?.uid;
+
+        if (!userId) {
+          console.error("User not logged in");
+          setLoading(false);
+          return;
+        }
+
+        const data = await getPendingSubmissions(userId);
+
+        // Ensure data is an array before filtering
+        if (Array.isArray(data)) {
+          const pending = data.filter((s) => s.status === "pending");
+          setSubmissions(pending);
+        } else {
+          console.error("Unexpected data format:", data);
+        }
+
       } catch (err) {
-        console.error("Failed to fetch submissions", err);
+        console.error("Failed to fetch pending submissions", err);
       }
       setLoading(false);
-    }
-    fetchSubmissions();
+    };
+
+    fetchData();
   }, []);
 
-  const handleApprove = async (id) => {
-    await axios.post(`/api/submissions/${id}/approve`);
-    setSubmissions(submissions.filter((s) => s._id !== id));
-    setModalOpen(false);
+  const handleApprove = async (submission) => {
+    try {
+      await approveSubmission(submission._id, submission.worker_email, submission.payable_amount);
+      setSubmissions((prev) => prev.filter((s) => s._id !== submission._id));
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Approve failed:", error);
+    }
   };
 
-  const handleReject = async (id) => {
-    await axios.post(`/api/submissions/${id}/reject`);
-    setSubmissions(submissions.filter((s) => s._id !== id));
-    setModalOpen(false);
+  const handleReject = async (submission) => {
+    try {
+      await rejectSubmission(submission._id, submission.task_id);
+      setSubmissions((prev) => prev.filter((s) => s._id !== submission._id));
+      setModalOpen(false);
+    } catch (error) {
+      console.error("Reject failed:", error);
+    }
   };
 
   return (
@@ -87,13 +115,13 @@ const ReviewSubmissions = () => {
 
             <div className="mt-6 flex justify-between">
               <button
-                onClick={() => handleApprove(selected._id)}
+                onClick={() => handleApprove(selected)}
                 className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
               >
                 Approve
               </button>
               <button
-                onClick={() => handleReject(selected._id)}
+                onClick={() => handleReject(selected)}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
               >
                 Reject

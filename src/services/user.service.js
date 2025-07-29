@@ -1,7 +1,9 @@
 import axios from "./axios";
 
-export const getUsers = async () => {
-  const res = await axios.get("http://localhost:5000/api/users");
+// Get all users or filter by role
+export const getUsers = async (role = "") => {
+  const url = role ? `http://localhost:5000/api/users?role=${role}` : `http://localhost:5000/api/users`;
+  const res = await axios.get(url);
   return res.data;
 };
 
@@ -16,8 +18,6 @@ export const deleteUser = async (id) => {
 };
 
 export const getTopWorkers = async (limit = 6) => {
-  const res = await axios.get(
-    `http://localhost:5000/api/users?role=Worker&sort=coin&limit=${limit}`
-  );
+  const res = await axios.get(`http://localhost:5000/api/users?role=Worker&sort=coin&limit=${limit}`);
   return res.data;
 };

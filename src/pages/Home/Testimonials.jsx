@@ -1,33 +1,65 @@
 import React from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import "swiper/swiper-bundle.css"; // Import Swiper styles
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/autoplay";
+
+const testimonials = [
+  {
+    id: 1,
+    name: "John Carter",
+    message:
+      "This platform completely changed the way I earn online. Reliable, fast, and user-friendly.",
+    image: "https://i.ibb.co/Y3tr0h6/user1.jpg",
+  },
+  {
+    id: 2,
+    name: "Sara Collins",
+    message:
+      "I was able to earn extra money while studying. The interface is so smooth and clean!",
+    image: "https://i.ibb.co/XkzNmWX/user2.jpg",
+  },
+  {
+    id: 3,
+    name: "Leo Williams",
+    message:
+      "Tasks are simple yet rewarding. I recommend it to everyone who wants legit income.",
+    image: "https://i.ibb.co/LRdNsWj/user3.jpg",
+  },
+];
 
 const Testimonials = () => {
   return (
-    <section className="bg-gray-900 text-white py-16">
-      <div className="container mx-auto text-center">
-        <h2 className="text-4xl font-semibold">What Our Users Say</h2>
+    <section className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-20 px-4">
+      <div className="max-w-4xl mx-auto text-center">
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-12 tracking-tight">
+          💬 Hear From Our Users
+        </h2>
+
         <Swiper
-          spaceBetween={50}
+          modules={[Autoplay]}
+          spaceBetween={30}
           slidesPerView={1}
           loop={true}
-          autoplay={{ delay: 2500, disableOnInteraction: false }}
-          className="mt-8"
+          autoplay={{ delay: 4000, disableOnInteraction: false }}
         >
-          <SwiperSlide>
-            <div className="flex flex-col items-center">
-              <img className="w-24 h-24 rounded-full" src="/path/to/user1.jpg" alt="User 1" />
-              <p className="mt-4 text-lg">"This platform is amazing! I earned coins quickly."</p>
-              <p className="mt-2 text-xl font-bold">John Doe</p>
-            </div>
-          </SwiperSlide>
-          <SwiperSlide>
-            <div className="flex flex-col items-center">
-              <img className="w-24 h-24 rounded-full" src="/path/to/user2.jpg" alt="User 2" />
-              <p className="mt-4 text-lg">"A great way to make some extra money in my free time."</p>
-              <p className="mt-2 text-xl font-bold">Jane Smith</p>
-            </div>
-          </SwiperSlide>
+          {testimonials.map((t) => (
+            <SwiperSlide key={t.id}>
+              <div className="bg-white/5 backdrop-blur-md p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl text-white transition-all duration-500 hover:scale-[1.015]">
+                <img
+                  src={t.image}
+                  alt={t.name}
+                  className="w-24 h-24 rounded-full border-4 border-blue-500 mx-auto object-cover shadow-md"
+                />
+                <p className="mt-6 text-lg italic leading-relaxed max-w-2xl mx-auto">
+                  “{t.message}”
+                </p>
+                <p className="mt-4 text-xl font-semibold text-blue-400">
+                  — {t.name}
+                </p>
+              </div>
+            </SwiperSlide>
+          ))}
         </Swiper>
       </div>
     </section>

@@ -1,50 +1,49 @@
-import axios from "./axios"; // Your axios base URL here
+import axios from "./axios"; // axios instance with baseURL
 import { getAuth } from "firebase/auth";
 
 const auth = getAuth();
 
-// Helper function to get Authorization Header
 const getAuthHeader = async () => {
-  if (!auth.currentUser) return {};  // If the user is not authenticated, return an empty object
-  const token = await auth.currentUser.getIdToken();  // Get the current user's token
+  if (!auth.currentUser) return {};
+  const token = await auth.currentUser.getIdToken();
   return {
     headers: {
-      Authorization: `Bearer ${token}`,  // Set Authorization header
+      Authorization: `Bearer ${token}`,
     },
   };
 };
 
-// Function to get admin stats (total workers, buyers, coins, payments)
+// Get Admin Stats
 export const getAdminStats = async () => {
-  try {
-    const res = await axios.get("/api/admin/stats", await getAuthHeader()); // Adding the auth header
-    return res.data;
-  } catch (error) {
-    console.error("Error fetching admin stats:", error);
-    throw new Error("Error fetching admin stats");
-  }
+  const res = await axios.get("/api/admin/stats", await getAuthHeader());
+  return res.data;
 };
 
-// Function to get pending withdrawal requests
+// Get pending withdrawals
 export const getPendingWithdrawals = async () => {
-  try {
-    const res = await axios.get("/api/withdrawals", await getAuthHeader()); // Adding the auth header
-    return res.data.filter((withdrawal) => withdrawal.status === "pending");
-  } catch (error) {
-    console.error("Error fetching pending withdrawals:", error);
-    throw new Error("Error fetching pending withdrawals");
-  }
+  const res = await axios.get("/api/withdrawals", await getAuthHeader());
+  return res.data.filter((w) => w.status === "pending");
 };
 
-// Function to approve a withdrawal payment
-export const approvePayment = async (withdrawalId, workerEmail, amount) => {
-  try {
-    // Approve the payment by updating the withdrawal status and decreasing the worker's coin
-    const res = await axios.post(`/api/withdrawals/${withdrawalId}/approve`, 
-      { workerEmail, amount }, await getAuthHeader());
-    return res.data;
-  } catch (error) {
-    console.error("Error approving payment:", error);
-    throw new Error("Error approving payment");
-  }
+// Approve withdrawal request & add coin to buyer
+export const approveWithdrawalRequest = async (withdrawalId) => {
+  const res = await axios.post(`/api/withdrawals/${withdrawalId}/approve`, {}, await getAuthHeader());
+  return res.data;
+};
+
+// Approve payment and add coins to buyer
+export const approvePayment = async (paymentId) => {
+  const res = await axios.post(
+    "/api/payments/approve",
+    { paymentId },
+    await getAuthHeader()
+  );
+  return res.data;
+};
+
+
+// Get pending payments
+export const getPendingPayments = async () => {
+  const res = await axios.get("/api/payments/pending", await getAuthHeader());
+  return res.data;
 };

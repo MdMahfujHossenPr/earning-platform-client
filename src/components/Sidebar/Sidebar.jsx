@@ -1,6 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { FaHome, FaTasks, FaUserAlt, FaCoins, FaSignOutAlt, FaCog } from "react-icons/fa";
+import {
+  FaHome,
+  FaTasks,
+  FaUserAlt,
+  FaCoins,
+  FaSignOutAlt,
+  FaCog,
+  FaClipboardCheck,
+} from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import useRole from "../../hooks/useRole";
 
@@ -21,7 +29,13 @@ const Sidebar = () => {
         {/* Home Link */}
         <li>
           <Link
-            to={role === "Buyer" ? "/dashboard/buyer-home" : role === "Worker" ? "/dashboard/worker-home" : "/dashboard/admin-home"}
+            to={
+              role === "Buyer"
+                ? "/dashboard/buyer-home"
+                : role === "Worker"
+                ? "/dashboard/worker-home"
+                : "/dashboard/admin-home"
+            }
             className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
           >
             <FaHome /> <span className="text-xl">Home</span>
@@ -90,6 +104,15 @@ const Sidebar = () => {
                 className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
               >
                 <FaCoins /> <span className="text-xl">Payment History</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/dashboard/review-submissions"
+                className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
+              >
+                <FaClipboardCheck />{" "}
+                <span className="text-xl">Review Submissions</span>
               </Link>
             </li>
           </>

@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { getPendingSubmissions, approveSubmission, rejectSubmission } from "../../../services/submission.service";  // Import functions from submission.service
+import { getPendingSubmissions } from "../../../services/submission.service";  // Import functions from submission.service
 import { useAuth } from "../../../context/AuthContext";  // To access the logged-in user info
 
 const WorkerHome = () => {
   const { user } = useAuth();  // Access logged-in user's information
   const [submissions, setSubmissions] = useState([]); // State to store submissions
+  const [totalSubmissions, setTotalSubmissions] = useState(0);  // Total submissions count
+  const [totalPending, setTotalPending] = useState(0);  // Total pending submissions count
+  const [totalEarnings, setTotalEarnings] = useState(0);  // Total earnings from approved submissions
   const [loading, setLoading] = useState(true); // State to manage loading state
   const [error, setError] = useState(null); // State to store any error
 
@@ -14,8 +17,19 @@ const WorkerHome = () => {
 
     const fetchWorkerData = async () => {
       try {
-        const data = await getPendingSubmissions(user.uid);  // Fetch the pending submissions for the logged-in worker
-        setSubmissions(data);  // Set the fetched submissions in state
+        const pendingData = await getPendingSubmissions(user.uid);  // Fetch the pending submissions for the logged-in worker
+        setSubmissions(pendingData);  // Set the fetched submissions in state
+
+        // Calculate total submissions, total pending, and total earnings
+        const totalSubmissions = pendingData.length; // Total submissions
+        const totalPending = pendingData.filter(sub => sub.status === "pending").length; // Filter for pending status
+        const totalEarnings = pendingData.reduce((acc, sub) => {
+          return sub.status === "approved" ? acc + sub.payable_amount : acc;
+        }, 0); // Calculate total earnings
+
+        setTotalSubmissions(totalSubmissions);
+        setTotalPending(totalPending);
+        setTotalEarnings(totalEarnings);
       } catch (err) {
         setError("Failed to load submissions.");
         console.error("Error fetching submissions:", err);
@@ -45,39 +59,27 @@ const WorkerHome = () => {
     );
   }
 
-  // Handle approve submission
-  const handleApprove = async (submissionId, workerEmail, payableAmount) => {
-    try {
-      const response = await approveSubmission(submissionId, workerEmail, payableAmount);
-      if (response.success) {
-        // Update state and show success toast
-        setSubmissions(prevState => prevState.filter(sub => sub._id !== submissionId));
-        alert("Submission approved successfully");
-      }
-    } catch (error) {
-      console.error("Error approving submission:", error);
-      alert("Failed to approve submission");
-    }
-  };
-
-  // Handle reject submission
-  const handleReject = async (submissionId, taskId) => {
-    try {
-      const response = await rejectSubmission(submissionId, taskId);
-      if (response.success) {
-        // Update state and show success toast
-        setSubmissions(prevState => prevState.filter(sub => sub._id !== submissionId));
-        alert("Submission rejected successfully");
-      }
-    } catch (error) {
-      console.error("Error rejecting submission:", error);
-      alert("Failed to reject submission");
-    }
-  };
-
   return (
     <div className="p-6">
       <h2 className="text-2xl font-bold mb-6">Worker Dashboard</h2>
+
+      {/* Stats Section */}
+      <div className="mb-6">
+        <div className="flex space-x-6">
+          <div className="bg-blue-100 p-4 rounded-lg shadow-md text-center">
+            <h4 className="font-semibold text-xl">Total Submissions</h4>
+            <p className="text-2xl">{totalSubmissions}</p>
+          </div>
+          <div className="bg-yellow-100 p-4 rounded-lg shadow-md text-center">
+            <h4 className="font-semibold text-xl">Total Pending Submissions</h4>
+            <p className="text-2xl">{totalPending}</p>
+          </div>
+          <div className="bg-green-100 p-4 rounded-lg shadow-md text-center">
+            <h4 className="font-semibold text-xl">Total Earnings</h4>
+            <p className="text-2xl">${totalEarnings}</p>
+          </div>
+        </div>
+      </div>
 
       {/* Pending Submissions Table */}
       <h3 className="text-xl font-semibold mb-4">Pending Submissions</h3>
@@ -91,7 +93,7 @@ const WorkerHome = () => {
                 <th className="px-4 py-2 text-left">Task Title</th>
                 <th className="px-4 py-2 text-left">Payable Amount</th>
                 <th className="px-4 py-2 text-left">Buyer Name</th>
-                <th className="px-4 py-2 text-left">Action</th>
+                <th className="px-4 py-2 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
@@ -101,18 +103,15 @@ const WorkerHome = () => {
                   <td className="px-4 py-2">{submission.payable_amount}</td>
                   <td className="px-4 py-2">{submission.buyer_name}</td>
                   <td className="px-4 py-2">
-                    <button
-                      onClick={() => handleApprove(submission._id, submission.worker_email, submission.payable_amount)}
-                      className="bg-green-500 text-white px-3 py-1 rounded mr-2"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => handleReject(submission._id, submission.task_id)}
-                      className="bg-red-500 text-white px-3 py-1 rounded"
-                    >
-                      Reject
-                    </button>
+                    {submission.status === "pending" && (
+                      <span className="text-yellow-500 font-semibold">Pending</span>
+                    )}
+                    {submission.status === "approved" && (
+                      <span className="text-green-500 font-semibold">Approved</span>
+                    )}
+                    {submission.status === "rejected" && (
+                      <span className="text-red-500 font-semibold">Rejected</span>
+                    )}
                   </td>
                 </tr>
               ))}
