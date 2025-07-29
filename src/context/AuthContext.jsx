@@ -30,8 +30,9 @@ export const AuthProvider = ({ children }) => {
     email: user.email,
     name: user.displayName || user.providerData?.[0]?.displayName || "User",
     profilePicture:
-      user.photoURL || user.providerData?.[0]?.photoURL || DEFAULT_PROFILE_PIC,
+    user.photoURL || user.providerData?.[0]?.photoURL || DEFAULT_PROFILE_PIC,
     role: user.role || "Worker", // Ensure role is included
+     _id: user.uid, // Assuming Firebase UID is the same as _id
   });
 
   useEffect(() => {

@@ -70,14 +70,17 @@
 │   │   │   ├── Buyer/
 │   │   │   │   ├── AddTask.jsx
 │   │   │   │   ├── BuyerHome.jsx
+│   │   │   │   └── Profile.jsx           // Profile page for Buyer
 │   │   │   │   ├── MyTasks.jsx
 │   │   │   │   ├── paymenthistory.jsx
 │   │   │   │   ├── PurchaseCoin.jsx
+│   │   │   │   ├── CheckoutForm.jsx
 │   │   │   │   └── ReviewSubmissions.jsx
 │   │   │   ├── Worker/
 │   │   │   │   ├── MySubmissions.jsx
 │   │   │   │   ├── TaskDetails.jsx
 │   │   │   │   ├── TaskList.jsx
+│   │   │   │   │ ── Profile.jsx           // Profile page for Worker (similar structure as Buyer)
 │   │   │   │   ├── Withdrawals.jsx
 │   │   │   │   └── WorkerHome.jsx
 │   │   │   ├── Admin/

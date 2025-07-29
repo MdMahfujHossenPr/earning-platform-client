@@ -1,135 +1,154 @@
-import React, { useEffect, useState } from "react";
-import {
-  getWithdrawals,
-  requestWithdrawal,
-} from "../../../services/withdrawal.service";
+import React, { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { addWithdrawalRequest } from "../../../services/withdrawal.service"; // Ensure this service function is defined
+import { useNavigate } from "react-router-dom";
+import useRole from "../../../hooks/useRole"; // useRole হুক ব্যবহার করা হচ্ছে
 
-const Withdrawals = () => {
+
+const Withdrawal = () => {
   const { user } = useAuth();
-  const [coinToWithdraw, setCoinToWithdraw] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState(0);
+  const { coin } = useRole(); // Get coin from useRole hook
+  const navigate = useNavigate();
+  const [withdrawalCoin, setWithdrawalCoin] = useState(0);
+  const [withdrawalAmount, setWithdrawalAmount] = useState(0);
   const [paymentSystem, setPaymentSystem] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
-  const [userCoins, setUserCoins] = useState(0);
-  const [withdrawRequests, setWithdrawRequests] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    // Fetch user coin from backend or context
-    setUserCoins(user.coin || 0);
-
-    async function fetchWithdrawals() {
-      const data = await getWithdrawals(user.email);
-      setWithdrawRequests(data);
-    }
-    fetchWithdrawals();
-  }, [user]);
+  const paymentSystems = ["Bkash", "Rocket", "Nagad", "Other"]; // Payment system options
 
   const handleCoinChange = (e) => {
-    const val = e.target.value;
-    setCoinToWithdraw(val);
-    setWithdrawAmount(val ? val / 20 : 0);
+    const coins = e.target.value;
+    setWithdrawalCoin(coins);
+    setWithdrawalAmount(coins / 20); // Calculate the withdrawal amount (20 coins = 1 dollar)
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (coinToWithdraw > userCoins) {
-      alert("You do not have enough coins");
+
+    if (withdrawalCoin < 200) {
+      setErrorMessage("You must have at least 200 coins to withdraw.");
       return;
     }
+
+    if (withdrawalCoin > coin) {
+      setErrorMessage("Insufficient coins.");
+      return;
+    }
+
     if (!paymentSystem || !accountNumber) {
-      alert("Please fill all fields");
+      setErrorMessage("Please select a payment system and provide an account number.");
       return;
     }
-    await requestWithdrawal({
-      worker_email: user.email,
-      worker_name: user.display_name,
-      withdrawal_coin: coinToWithdraw,
-      withdrawal_amount: withdrawAmount,
-      payment_system: paymentSystem,
-      account_number: accountNumber,
-      withdraw_date: new Date(),
-      status: "pending",
-    });
-    alert("Withdrawal request submitted");
-    setCoinToWithdraw("");
-    setWithdrawAmount(0);
-    setPaymentSystem("");
-    setAccountNumber("");
+
+    try {
+      const withdrawalData = {
+        worker_email: user.email,
+        worker_name: user.name,
+        withdrawal_coin: withdrawalCoin,
+        withdrawal_amount: withdrawalAmount,
+        payment_system: paymentSystem,
+        account_number: accountNumber,
+        withdraw_date: new Date(),
+        status: "pending",
+      };
+
+      // Call the service to save the withdrawal request in the database
+      await addWithdrawalRequest(withdrawalData);
+
+      alert("Withdrawal request submitted successfully!");
+      navigate("/dashboard/withdrawals"); // Redirect to withdrawals page
+    } catch (error) {
+      console.error("Error submitting withdrawal request:", error);
+      setErrorMessage("There was an error processing your withdrawal request.");
+    }
   };
 
   return (
-    <div>
-      <h2>Withdraw Coins</h2>
-      <p>Your Available Coins: {userCoins}</p>
-      {userCoins < 200 ? (
-        <p>Insufficient coins to withdraw (minimum 200 coins required)</p>
-      ) : (
-        <form onSubmit={handleSubmit}>
-          <label>
-            Coins to Withdraw:
-            <input
-              type="number"
-              value={coinToWithdraw}
-              onChange={handleCoinChange}
-              max={userCoins}
-              min="20"
-              required
-            />
-          </label>
-          <p>Withdraw Amount ($): {withdrawAmount.toFixed(2)}</p>
-          <label>
-            Payment System:
-            <select
-              value={paymentSystem}
-              onChange={(e) => setPaymentSystem(e.target.value)}
-              required
-            >
-              <option value="">Select</option>
-              <option value="Bkash">Bkash</option>
-              <option value="Rocket">Rocket</option>
-              <option value="Nagad">Nagad</option>
-              <option value="Other">Other</option>
-            </select>
-          </label>
-          <label>
-            Account Number:
-            <input
-              type="text"
-              value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
-              required
-            />
-          </label>
-          <button type="submit">Withdraw</button>
-        </form>
-      )}
+    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-xl">
+      <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">Withdrawal Form</h2>
 
-      <h3>Withdrawal Requests</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Coins</th>
-            <th>Amount ($)</th>
-            <th>Payment System</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {withdrawRequests.map((req) => (
-            <tr key={req._id}>
-              <td>{req.withdrawal_coin}</td>
-              <td>{req.withdrawal_amount}</td>
-              <td>{req.payment_system}</td>
-              <td>{req.status}</td>
-              <td>{new Date(req.withdraw_date).toLocaleDateString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
+
+      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+        <p className="text-gray-700">
+          <strong>Your Current Coin Balance:</strong> {coin} Coins
+        </p>
+        <p className="text-gray-700">
+          <strong>Your Total Withdrawal Amount:</strong> ${Math.floor(coin / 20)} USD
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label className="block text-gray-700 font-medium">Coin To Withdraw</label>
+          <input
+            type="number"
+            name="withdrawalCoin"
+            value={withdrawalCoin}
+            onChange={handleCoinChange}
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            min="1"
+            required
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 font-medium">Withdrawal Amount ($)</label>
+          <input
+            type="number"
+            name="withdrawalAmount"
+            value={withdrawalAmount}
+            readOnly
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-gray-700 font-medium">Select Payment System</label>
+          <select
+            name="paymentSystem"
+            value={paymentSystem}
+            onChange={(e) => setPaymentSystem(e.target.value)}
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select Payment System</option>
+            {paymentSystems.map((system) => (
+              <option key={system} value={system}>
+                {system}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-gray-700 font-medium">Account Number</label>
+          <input
+            type="text"
+            name="accountNumber"
+            value={accountNumber}
+            onChange={(e) => setAccountNumber(e.target.value)}
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        <div className="text-center mt-4">
+          {withdrawalCoin >= 200 ? (
+            <button
+              type="submit"
+              className="btn btn-primary w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none"
+            >
+              Submit Withdrawal
+            </button>
+          ) : (
+            <p className="text-red-500">Insufficient coin balance for withdrawal (min 200 coins).</p>
+          )}
+        </div>
+      </form>
     </div>
   );
 };
 
-export default Withdrawals;
+export default Withdrawal;

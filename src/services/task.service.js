@@ -16,21 +16,6 @@ const getAuthHeader = async () => {
   };
 };
 
-// task.service.js
-export const submitTask = async (data) => {
-  const config = await getAuthHeader();
-  try {
-    console.log("Submitting task with data:", data); // Log the data being submitted
-    
-    const res = await axios.post("/api/submissions", data, config);
-    console.log("Response from submission:", res); // Log the response from backend
-    return res.data;
-  } catch (error) {
-    console.error("Error submitting task:", error.response || error.message);
-    throw new Error(error.response?.data?.message || "Error submitting task");
-  }
-};
-
 
 // Add task
 export const addTask = async (data) => {
@@ -60,6 +45,23 @@ export const getTaskById = async (id) => {
     throw new Error("Failed to fetch task details.");
   }
 };
+
+
+// task.service.js
+export const submitTask = async (data) => {
+  const config = await getAuthHeader();
+  try {
+    console.log("Submitting task with data:", data); // Log the data being submitted
+    
+    const res = await axios.post("/api/submissions", data, config);
+    console.log("Response from submission:", res); // Log the response from backend
+    return res.data;
+  } catch (error) {
+    console.error("Error submitting task:", error.response || error.message);
+    throw new Error(error.response?.data?.message || "Error submitting task");
+  }
+};
+
 
 // Update task
 export const updateTask = async (taskId, data) => {

@@ -1,37 +1,50 @@
-import axios from 'axios';
+import axios from "./axios"; // Your axios base URL here
+import { getAuth } from "firebase/auth";
 
-// API URL for your server (adjust as necessary)
-const API_URL = 'http://localhost:5000/api/admin'; 
+const auth = getAuth();
 
-// Get user count by role (worker or buyer)
-export const getUsersCount = async (role) => {
+// Helper function to get Authorization Header
+const getAuthHeader = async () => {
+  if (!auth.currentUser) return {};  // If the user is not authenticated, return an empty object
+  const token = await auth.currentUser.getIdToken();  // Get the current user's token
+  return {
+    headers: {
+      Authorization: `Bearer ${token}`,  // Set Authorization header
+    },
+  };
+};
+
+// Function to get admin stats (total workers, buyers, coins, payments)
+export const getAdminStats = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/users/count/${role}`);
-    return response.data;
+    const res = await axios.get("/api/admin/stats", await getAuthHeader()); // Adding the auth header
+    return res.data;
   } catch (error) {
-    console.error('Error fetching users count:', error);
-    return 0;
+    console.error("Error fetching admin stats:", error);
+    throw new Error("Error fetching admin stats");
   }
 };
 
-// Get total coins
-export const getTotalCoins = async () => {
+// Function to get pending withdrawal requests
+export const getPendingWithdrawals = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/admin/total-coins`);
-    return response.data;
+    const res = await axios.get("/api/withdrawals", await getAuthHeader()); // Adding the auth header
+    return res.data.filter((withdrawal) => withdrawal.status === "pending");
   } catch (error) {
-    console.error('Error fetching total coins:', error);
-    return 0;
+    console.error("Error fetching pending withdrawals:", error);
+    throw new Error("Error fetching pending withdrawals");
   }
 };
 
-// Get total payments
-export const getTotalPayments = async () => {
+// Function to approve a withdrawal payment
+export const approvePayment = async (withdrawalId, workerEmail, amount) => {
   try {
-    const response = await axios.get(`http://localhost:5000/admin/total-payments`);
-    return response.data;
+    // Approve the payment by updating the withdrawal status and decreasing the worker's coin
+    const res = await axios.post(`/api/withdrawals/${withdrawalId}/approve`, 
+      { workerEmail, amount }, await getAuthHeader());
+    return res.data;
   } catch (error) {
-    console.error('Error fetching total payments:', error);
-    return 0;
+    console.error("Error approving payment:", error);
+    throw new Error("Error approving payment");
   }
 };

@@ -13,32 +13,34 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Manual Login
+  // Manual Login handler
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Basic validation
     if (!email || !password) {
       toast.error("❌ Email and password are required!");
       return;
     }
+
     setLoading(true);
+
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
       const user = res.user;
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || "User",
-          profilePicture:
-            user.photoURL ||
-            "https://cdn-icons-png.flaticon.com/512/149/149071.png",
-        })
-      );
+
+      // Storing user data in localStorage
+      localStorage.setItem("user", JSON.stringify({
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || "User",
+        profilePicture: user.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png",
+      }));
+
       localStorage.setItem("isLoggedIn", "true");
 
       toast.success("✅ Login successful!");
-      navigate("/");
+      navigate("/"); // Redirect to homepage
     } catch (err) {
       toast.error(`❌ Login failed: ${err.message}`);
     } finally {
@@ -46,44 +48,41 @@ const Login = () => {
     }
   };
 
-  // Google Login (as before)
+  // Google Login handler
   const handleGoogleLogin = async () => {
     setLoading(true);
+
     try {
       const result = await signInWithPopup(auth, googleProvider);
       const user = result.user;
 
-      await fetch(
-        "http://localhost:5000/api/users",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user.email,
-            name: user.displayName,
-            photoURL: user.photoURL,
-            method: "google",
-          }),
-        }
-      );
+      // Create user in the backend if doesn't exist
+      await fetch("http://localhost:5000/api/users", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          name: user.displayName,
+          photoURL: user.photoURL,
+          method: "google",
+        }),
+      });
 
-      const res = await fetch(
-        "http://localhost:5000/login",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: user.email,
-            method: "google",
-          }),
-        }
-      );
+      // Login to backend and receive token
+      const res = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: user.email,
+          method: "google",
+        }),
+      });
 
       const data = await res.json();
       if (res.ok) {
         localStorage.setItem("isLoggedIn", "true");
         toast.success("✅ Google login successful!");
-        navigate("/");
+        navigate("/"); // Redirect to homepage
       } else {
         toast.error(data?.message || "❌ Google login failed");
       }
@@ -95,12 +94,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <title>Login</title>
+    <div className="min-h-screen flex items-center justify-center px-4 bg-gray-700">
       <div className="bg-gray-800 p-10 rounded-lg shadow-2xl w-full max-w-lg border-8 border-white">
-        <h2 className="text-3xl font-bold text-white mb-8 text-center">
-          Login to Your Account
-        </h2>
+        <h2 className="text-3xl font-bold text-white mb-8 text-center">Login to Your Account</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6 text-white">
           <div>
@@ -117,10 +113,10 @@ const Login = () => {
               placeholder="Enter your email"
             />
           </div>
+
           <div>
             <label className="block font-semibold mb-2" htmlFor="password">
-              <MdLockOutline className="inline-block mr-2 text-white" />{" "}
-              Password
+              <MdLockOutline className="inline-block mr-2 text-white" /> Password
             </label>
             <input
               id="password"
@@ -132,39 +128,22 @@ const Login = () => {
               placeholder="Enter your password"
             />
           </div>
+
           <div className="flex justify-between">
-            <Link
-              to="/forget-password"
-              className="text-gray-200 hover:text-gray-400 text-sm underline"
-            >
+            <Link to="/forget-password" className="text-gray-200 hover:text-gray-400 text-sm underline">
               Forgot password?
             </Link>
           </div>
+
           <button
             type="submit"
             disabled={loading}
             className="w-full bg-gray-500 hover:bg-gray-600 text-white py-3 rounded-lg transition duration-300 flex justify-center items-center"
           >
             {loading ? (
-              <svg
-                className="animate-spin h-10 w-10 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                ></path>
+              <svg className="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
               </svg>
             ) : (
               "Log In"
@@ -188,10 +167,7 @@ const Login = () => {
 
         <p className="text-center text-sm mt-6 text-gray-200">
           Don't have an account?{" "}
-          <Link
-            to="/register"
-            className="text-gray-300 hover:text-gray-500 underline font-semibold"
-          >
+          <Link to="/register" className="text-gray-300 hover:text-gray-500 underline font-semibold">
             Register here
           </Link>
         </p>

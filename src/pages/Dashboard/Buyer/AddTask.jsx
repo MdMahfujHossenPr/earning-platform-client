@@ -16,6 +16,7 @@ const AddTask = () => {
     completion_date: "",
     submission_info: "",
     task_image_url: "",
+    buyer_name: user?.name || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -29,7 +30,7 @@ const AddTask = () => {
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrorMsg("");
+    setErrorMsg(""); // Clear error message on change
   };
 
   const handleImageUpload = async (e) => {
@@ -39,7 +40,7 @@ const AddTask = () => {
     setLoading(true);
     setErrorMsg("");
     try {
-      const url = await uploadImageToImgBB(file);
+      const url = await uploadImageToImgBB(file);  // Image upload to ImgBB
       setFormData((prev) => ({ ...prev, task_image_url: url }));
     } catch {
       setErrorMsg("Image upload failed. Please try again.");
@@ -60,6 +61,7 @@ const AddTask = () => {
       task_image_url,
     } = formData;
 
+    // Validate if all required fields are filled
     if (
       !task_title?.trim() ||
       !task_detail?.trim() ||
@@ -72,9 +74,11 @@ const AddTask = () => {
       return;
     }
 
+    // Parse numbers
     const reqWorkersNum = parseInt(required_workers, 10);
     const payableAmountNum = parseInt(payable_amount, 10);
 
+    // Validate if the numbers are positive
     if (
       isNaN(reqWorkersNum) ||
       isNaN(payableAmountNum) ||
@@ -85,18 +89,22 @@ const AddTask = () => {
       return;
     }
 
+    // Validate if the completion date is a valid date
     if (isNaN(Date.parse(completion_date))) {
       setErrorMsg("Please select a valid completion date.");
       return;
     }
 
     const totalPayable = reqWorkersNum * payableAmountNum;
+
+    // Check if the user has enough coins
     if (user.coin < totalPayable) {
       alert("❌ Not enough coins. Please purchase coins.");
       navigate("/dashboard/buyer/purchasecoin");
       return;
     }
 
+    // Prepare the task payload
     const taskPayload = {
       task_title: task_title.trim(),
       task_detail: task_detail.trim(),
@@ -105,14 +113,17 @@ const AddTask = () => {
       completion_date,
       submission_info: submission_info.trim(),
       task_image_url,
+      uid: user.uid,
+      buyer_name: user.name, // Add buyer's name from the user context
     };
 
     console.log("Sending task payload:", taskPayload);
 
     setLoading(true);
-    setErrorMsg("");
+    setErrorMsg(""); // Clear previous errors
 
     try {
+      // Add task to database
       await addTask(taskPayload);
       alert("✅ Task added successfully!");
       navigate("/dashboard/my-tasks");
@@ -133,89 +144,116 @@ const AddTask = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow">
-      <h2 className="text-3xl font-semibold mb-6">Add New Task</h2>
+    <div className="max-w-4xl mx-auto p-8 bg-gray-100 rounded-xl shadow-lg">
+      <h2 className="text-3xl font-semibold text-center mb-6">Add New Task</h2>
 
+      {/* Display error messages */}
       {errorMsg && (
         <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">{errorMsg}</div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <input
-          type="text"
-          name="task_title"
-          placeholder="Task Title (ex: Watch my YouTube video and comment)"
-          value={formData.task_title}
-          onChange={handleChange}
-          required
-          className="input input-bordered w-full"
-        />
-
-        <textarea
-          name="task_detail"
-          placeholder="Task Detail"
-          value={formData.task_detail}
-          onChange={handleChange}
-          required
-          className="textarea textarea-bordered w-full"
-          rows={4}
-        />
-
-        <input
-          type="number"
-          name="required_workers"
-          placeholder="Required Workers (ex: 100)"
-          value={formData.required_workers}
-          onChange={handleChange}
-          required
-          min={1}
-          className="input input-bordered w-full"
-        />
-
-        <input
-          type="number"
-          name="payable_amount"
-          placeholder="Payable Amount per Worker (ex: 10)"
-          value={formData.payable_amount}
-          onChange={handleChange}
-          required
-          min={1}
-          className="input input-bordered w-full"
-        />
-
-        <input
-          type="date"
-          name="completion_date"
-          value={formData.completion_date}
-          onChange={handleChange}
-          required
-          className="input input-bordered w-full"
-        />
-
-        <textarea
-          name="submission_info"
-          placeholder="Submission Info (e.g. Screenshot or proof)"
-          value={formData.submission_info}
-          onChange={handleChange}
-          required
-          className="textarea textarea-bordered w-full"
-          rows={3}
-        />
-
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Task Title */}
         <div>
-          <label className="block mb-1 font-medium">Task Image (Optional)</label>
+          <label className="block text-gray-700 font-medium">Task Title</label>
+          <input
+            type="text"
+            name="task_title"
+            placeholder="Task Title (e.g. Watch my YouTube video and comment)"
+            value={formData.task_title}
+            onChange={handleChange}
+            required
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Task Detail */}
+        <div>
+          <label className="block text-gray-700 font-medium">Task Detail</label>
+          <textarea
+            name="task_detail"
+            placeholder="Task Detail"
+            value={formData.task_detail}
+            onChange={handleChange}
+            required
+            className="textarea textarea-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={4}
+          />
+        </div>
+
+        {/* Required Workers and Payable Amount */}
+        <div className="flex space-x-4">
+          <div className="flex-1">
+            <label className="block text-gray-700 font-medium">Required Workers</label>
+            <input
+              type="number"
+              name="required_workers"
+              placeholder="e.g., 100"
+              value={formData.required_workers}
+              onChange={handleChange}
+              required
+              min={1}
+              className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-gray-700 font-medium">Payable Amount</label>
+            <input
+              type="number"
+              name="payable_amount"
+              placeholder="e.g., 10"
+              value={formData.payable_amount}
+              onChange={handleChange}
+              required
+              min={1}
+              className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        </div>
+
+        {/* Completion Date */}
+        <div>
+          <label className="block text-gray-700 font-medium">Completion Date</label>
+          <input
+            type="date"
+            name="completion_date"
+            value={formData.completion_date}
+            onChange={handleChange}
+            required
+            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Submission Info */}
+        <div>
+          <label className="block text-gray-700 font-medium">Submission Info</label>
+          <textarea
+            name="submission_info"
+            placeholder="Submission Info (e.g. Screenshot or proof)"
+            value={formData.submission_info}
+            onChange={handleChange}
+            required
+            className="textarea textarea-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={3}
+          />
+        </div>
+
+        {/* Task Image */}
+        <div>
+          <label className="block text-gray-700 font-medium">Task Image (Optional)</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            className="file-input file-input-bordered w-full"
+            className="file-input file-input-bordered w-full mt-2"
           />
           {loading && <p className="mt-2 text-blue-600 font-semibold">Uploading image...</p>}
           {formData.task_image_url && !loading && (
             <img
               src={formData.task_image_url}
               alt="Uploaded Task"
-              className="mt-3 max-h-48 rounded"
+              className="mt-3 max-h-48 rounded-lg"
             />
           )}
         </div>
@@ -223,7 +261,7 @@ const AddTask = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`btn btn-primary w-full ${loading ? "opacity-70" : ""}`}
+          className={`btn btn-primary w-full ${loading ? "opacity-70" : ""} py-3`}
         >
           {loading ? "Please wait..." : "Add Task"}
         </button>

@@ -41,7 +41,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/dashboard/my-submissions"
+                to="/dashboard/worker/my-submissions"
                 className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
               >
                 <FaTasks /> <span className="text-xl">My Submissions</span>
@@ -86,7 +86,7 @@ const Sidebar = () => {
             </li>
             <li>
               <Link
-                to="/dashboard/paymenthistory"
+                to="/dashboard/buyer/payment-history"
                 className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
               >
                 <FaCoins /> <span className="text-xl">Payment History</span>

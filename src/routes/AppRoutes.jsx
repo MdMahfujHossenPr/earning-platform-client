@@ -65,7 +65,7 @@ const router = createBrowserRouter([
 
       // Worker Routes
       { path: "/dashboard/worker-home", element: <WorkerHome /> },
-      { path: "/dashboard/my-submissions", element: <MySubmissions /> },
+      { path: "/dashboard/worker/my-submissions", element: <MySubmissions /> },
       { path: "/dashboard/task-details/:id", element: <TaskDetails /> },
       { path: "/dashboard/task-list", element: <TaskList /> },
       { path: "/dashboard/withdrawals", element: <Withdrawals /> },

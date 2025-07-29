@@ -1,28 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { getWithdrawRequests, approveWithdrawRequest } from '../../../services/withdraw.service';
+import { showToast } from '../../../utils/showToast'; // Import the showToast function
 
 const WithdrawRequests = () => {
   const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchRequests();
   }, []);
 
   const fetchRequests = async () => {
-    const data = await getWithdrawRequests();
-    setRequests(data);
+    setLoading(true);
+    try {
+      const data = await getWithdrawRequests();
+      setRequests(data);
+      setLoading(false);
+    } catch (error) {
+      showToast("Failed to fetch withdrawal requests", "error"); // Show error toast if fetching fails
+      setLoading(false);
+    }
   };
 
   const handleApprove = async (requestId) => {
-    if(window.confirm("Approve this withdrawal request?")) {
+    if (window.confirm("Approve this withdrawal request?")) {
       await approveWithdrawRequest(requestId);
-      fetchRequests();
+      fetchRequests(); // Refresh the requests after approval
     }
   };
 
   return (
     <div>
       <h2>Withdrawal Requests</h2>
+      {loading && <p>Loading...</p>} {/* Show loading text while fetching */}
       <table>
         <thead>
           <tr>
