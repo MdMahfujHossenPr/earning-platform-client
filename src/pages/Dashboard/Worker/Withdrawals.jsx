@@ -1,26 +1,26 @@
 import React, { useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
-import { addWithdrawalRequest } from "../../../services/withdrawal.service"; // Ensure this service function is defined
+import { addWithdrawalRequest } from "../../../services/withdrawal.service";
 import { useNavigate } from "react-router-dom";
-import useRole from "../../../hooks/useRole"; // useRole হুক ব্যবহার করা হচ্ছে
-
+import useRole from "../../../hooks/useRole";
 
 const Withdrawal = () => {
   const { user } = useAuth();
-  const { coin } = useRole(); // Get coin from useRole hook
+  const { coin } = useRole();
   const navigate = useNavigate();
+
   const [withdrawalCoin, setWithdrawalCoin] = useState(0);
   const [withdrawalAmount, setWithdrawalAmount] = useState(0);
   const [paymentSystem, setPaymentSystem] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const paymentSystems = ["Bkash", "Rocket", "Nagad", "Other"]; // Payment system options
+  const paymentSystems = ["Bkash", "Rocket", "Nagad", "Other"];
 
   const handleCoinChange = (e) => {
-    const coins = e.target.value;
+    const coins = parseInt(e.target.value);
     setWithdrawalCoin(coins);
-    setWithdrawalAmount(coins / 20); // Calculate the withdrawal amount (20 coins = 1 dollar)
+    setWithdrawalAmount(coins / 20);
   };
 
   const handleSubmit = async (e) => {
@@ -53,100 +53,103 @@ const Withdrawal = () => {
         status: "pending",
       };
 
-      // Call the service to save the withdrawal request in the database
       await addWithdrawalRequest(withdrawalData);
-
       alert("Withdrawal request submitted successfully!");
-      navigate("/dashboard/withdrawals"); // Redirect to withdrawals page
+      navigate("/dashboard/withdrawals");
     } catch (error) {
-      console.error("Error submitting withdrawal request:", error);
+      console.error("Error:", error);
       setErrorMessage("There was an error processing your withdrawal request.");
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-gray-50 rounded-lg shadow-xl">
-      <h2 className="text-3xl font-semibold text-center mb-6 text-gray-800">Withdrawal Form</h2>
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="bg-gradient-to-br from-blue-100 to-purple-200 p-8 rounded-2xl shadow-xl">
+        <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">💸 Withdrawal Request</h2>
 
-      {errorMessage && <div className="text-red-500 text-center mb-4">{errorMessage}</div>}
+        {errorMessage && (
+          <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4 text-center">
+            {errorMessage}
+          </div>
+        )}
 
-      <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-        <p className="text-gray-700">
-          <strong>Your Current Coin Balance:</strong> {coin} Coins
-        </p>
-        <p className="text-gray-700">
-          <strong>Your Total Withdrawal Amount:</strong> ${Math.floor(coin / 20)} USD
-        </p>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-gray-700 font-medium">Coin To Withdraw</label>
-          <input
-            type="number"
-            name="withdrawalCoin"
-            value={withdrawalCoin}
-            onChange={handleCoinChange}
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            min="1"
-            required
-          />
+        <div className="bg-white p-6 rounded-xl shadow-md mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p className="text-lg text-gray-700">
+            <span className="font-bold">Your Coin Balance:</span> <span className="text-blue-600">{coin}</span> coins
+          </p>
+          <p className="text-lg text-gray-700">
+            <span className="font-bold">You Can Withdraw:</span>{" "}
+            <span className="text-green-600">${Math.floor(coin / 20)}</span> USD
+          </p>
         </div>
 
-        <div>
-          <label className="block text-gray-700 font-medium">Withdrawal Amount ($)</label>
-          <input
-            type="number"
-            name="withdrawalAmount"
-            value={withdrawalAmount}
-            readOnly
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
+          <div>
+            <label className="block text-gray-800 font-semibold mb-1">Coins to Withdraw</label>
+            <input
+              type="number"
+              value={withdrawalCoin}
+              onChange={handleCoinChange}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              min="1"
+              required
+            />
+          </div>
 
-        <div>
-          <label className="block text-gray-700 font-medium">Select Payment System</label>
-          <select
-            name="paymentSystem"
-            value={paymentSystem}
-            onChange={(e) => setPaymentSystem(e.target.value)}
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          >
-            <option value="">Select Payment System</option>
-            {paymentSystems.map((system) => (
-              <option key={system} value={system}>
-                {system}
-              </option>
-            ))}
-          </select>
-        </div>
+          <div>
+            <label className="block text-gray-800 font-semibold mb-1">Withdrawal Amount ($)</label>
+            <input
+              type="number"
+              value={withdrawalAmount}
+              readOnly
+              className="w-full p-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-600"
+            />
+          </div>
 
-        <div>
-          <label className="block text-gray-700 font-medium">Account Number</label>
-          <input
-            type="text"
-            name="accountNumber"
-            value={accountNumber}
-            onChange={(e) => setAccountNumber(e.target.value)}
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            required
-          />
-        </div>
-
-        <div className="text-center mt-4">
-          {withdrawalCoin >= 200 ? (
-            <button
-              type="submit"
-              className="btn btn-primary w-full py-3 px-6 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none"
+          <div>
+            <label className="block text-gray-800 font-semibold mb-1">Payment System</label>
+            <select
+              value={paymentSystem}
+              onChange={(e) => setPaymentSystem(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
             >
-              Submit Withdrawal
-            </button>
-          ) : (
-            <p className="text-red-500">Insufficient coin balance for withdrawal (min 200 coins).</p>
-          )}
-        </div>
-      </form>
+              <option value="" disabled className="text-gray-400">
+                -- Select Payment System --
+              </option>
+              {paymentSystems.map((system) => (
+                <option key={system} value={system}>
+                  {system}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-800 font-semibold mb-1">Account Number</label>
+            <input
+              type="text"
+              value={accountNumber}
+              onChange={(e) => setAccountNumber(e.target.value)}
+              className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          <div className="mt-4">
+            {withdrawalCoin >= 200 ? (
+              <button
+                type="submit"
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-lg hover:opacity-90 transition"
+              >
+                Submit Withdrawal
+              </button>
+            ) : (
+              <p className="text-red-500 font-medium text-center">Minimum 200 coins required to withdraw.</p>
+            )}
+          </div>
+        </form>
+      </div>
     </div>
   );
 };

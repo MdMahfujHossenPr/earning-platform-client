@@ -92,6 +92,21 @@ export const getPendingSubmissions = async (userId) => {
   }
 };
 
+
+export const getBuyerStats = async (userId) => {
+  try {
+    const authHeader = await getAuthHeader();
+    const response = await axios.get(
+      `http://localhost:5000/api/buyer/${userId}/stats`, // তোমার API অনুযায়ী URL ঠিক করো
+      authHeader
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching buyer stats:", error);
+    throw error;
+  }
+};
+
 export default {
   approveSubmission,
   rejectSubmission,

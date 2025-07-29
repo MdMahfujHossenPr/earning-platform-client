@@ -30,7 +30,7 @@ const AddTask = () => {
     }
 
     setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrorMsg(""); // Clear error message on change
+    setErrorMsg("");
   };
 
   const handleImageUpload = async (e) => {
@@ -40,7 +40,7 @@ const AddTask = () => {
     setLoading(true);
     setErrorMsg("");
     try {
-      const url = await uploadImageToImgBB(file);  // Image upload to ImgBB
+      const url = await uploadImageToImgBB(file);
       setFormData((prev) => ({ ...prev, task_image_url: url }));
     } catch {
       setErrorMsg("Image upload failed. Please try again.");
@@ -61,7 +61,6 @@ const AddTask = () => {
       task_image_url,
     } = formData;
 
-    // Validate if all required fields are filled
     if (
       !task_title?.trim() ||
       !task_detail?.trim() ||
@@ -74,11 +73,9 @@ const AddTask = () => {
       return;
     }
 
-    // Parse numbers
     const reqWorkersNum = parseInt(required_workers, 10);
     const payableAmountNum = parseInt(payable_amount, 10);
 
-    // Validate if the numbers are positive
     if (
       isNaN(reqWorkersNum) ||
       isNaN(payableAmountNum) ||
@@ -89,7 +86,6 @@ const AddTask = () => {
       return;
     }
 
-    // Validate if the completion date is a valid date
     if (isNaN(Date.parse(completion_date))) {
       setErrorMsg("Please select a valid completion date.");
       return;
@@ -97,14 +93,12 @@ const AddTask = () => {
 
     const totalPayable = reqWorkersNum * payableAmountNum;
 
-    // Check if the user has enough coins
     if (user.coin < totalPayable) {
       alert("❌ Not enough coins. Please purchase coins.");
       navigate("/dashboard/buyer/purchasecoin");
       return;
     }
 
-    // Prepare the task payload
     const taskPayload = {
       task_title: task_title.trim(),
       task_detail: task_detail.trim(),
@@ -114,16 +108,15 @@ const AddTask = () => {
       submission_info: submission_info.trim(),
       task_image_url,
       uid: user.uid,
-      buyer_name: user.name, // Add buyer's name from the user context
+      buyer_name: user.name,
     };
 
     console.log("Sending task payload:", taskPayload);
 
     setLoading(true);
-    setErrorMsg(""); // Clear previous errors
+    setErrorMsg("");
 
     try {
-      // Add task to database
       await addTask(taskPayload);
       alert("✅ Task added successfully!");
       navigate("/dashboard/my-tasks");
@@ -144,10 +137,12 @@ const AddTask = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-8 bg-gray-100 rounded-xl shadow-lg">
-      <h2 className="text-3xl font-semibold text-center mb-6">Add New Task</h2>
+    <div className="max-w-4xl mx-auto p-8 bg-gray-200 rounded-xl shadow-lg
+                    border-white border-2 md:border-4">
+      <h2 className="text-3xl font-semibold text-center mb-6 text-sky-700">
+        Add New Task
+      </h2>
 
-      {/* Display error messages */}
       {errorMsg && (
         <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">{errorMsg}</div>
       )}
@@ -155,7 +150,7 @@ const AddTask = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Task Title */}
         <div>
-          <label className="block text-gray-700 font-medium">Task Title</label>
+          <label className="block text-sky-700 font-semibold">Task Title</label>
           <input
             type="text"
             name="task_title"
@@ -163,28 +158,30 @@ const AddTask = () => {
             value={formData.task_title}
             onChange={handleChange}
             required
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input input-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4 
+                       bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
         {/* Task Detail */}
         <div>
-          <label className="block text-gray-700 font-medium">Task Detail</label>
+          <label className="block text-sky-700 font-semibold">Task Detail</label>
           <textarea
             name="task_detail"
             placeholder="Task Detail"
             value={formData.task_detail}
             onChange={handleChange}
             required
-            className="textarea textarea-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={4}
+            className="textarea textarea-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4
+                       bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
         {/* Required Workers and Payable Amount */}
-        <div className="flex space-x-4">
+        <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
           <div className="flex-1">
-            <label className="block text-gray-700 font-medium">Required Workers</label>
+            <label className="block text-sky-700 font-semibold">Required Workers</label>
             <input
               type="number"
               name="required_workers"
@@ -193,12 +190,13 @@ const AddTask = () => {
               onChange={handleChange}
               required
               min={1}
-              className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input input-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4
+                         bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
 
           <div className="flex-1">
-            <label className="block text-gray-700 font-medium">Payable Amount</label>
+            <label className="block text-sky-700 font-semibold">Payable Amount</label>
             <input
               type="number"
               name="payable_amount"
@@ -207,53 +205,56 @@ const AddTask = () => {
               onChange={handleChange}
               required
               min={1}
-              className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="input input-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4
+                         bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
         </div>
 
         {/* Completion Date */}
         <div>
-          <label className="block text-gray-700 font-medium">Completion Date</label>
+          <label className="block text-sky-700 font-semibold">Completion Date</label>
           <input
             type="date"
             name="completion_date"
             value={formData.completion_date}
             onChange={handleChange}
             required
-            className="input input-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="input input-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4
+                       bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
         {/* Submission Info */}
         <div>
-          <label className="block text-gray-700 font-medium">Submission Info</label>
+          <label className="block text-sky-700 font-semibold">Submission Info</label>
           <textarea
             name="submission_info"
             placeholder="Submission Info (e.g. Screenshot or proof)"
             value={formData.submission_info}
             onChange={handleChange}
             required
-            className="textarea textarea-bordered w-full text-gray-700 p-3 mt-2 rounded-lg border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
+            className="textarea textarea-bordered w-full text-sky-700 p-3 mt-2 rounded-lg border-white border-2 md:border-4
+                       bg-white focus:outline-none focus:ring-2 focus:ring-sky-500"
           />
         </div>
 
         {/* Task Image */}
         <div>
-          <label className="block text-gray-700 font-medium">Task Image (Optional)</label>
+          <label className="block text-sky-700 font-semibold">Task Image (Optional)</label>
           <input
             type="file"
             accept="image/*"
             onChange={handleImageUpload}
-            className="file-input file-input-bordered w-full mt-2"
+            className="file-input file-input-bordered w-full mt-2 border-white border-2 md:border-4"
           />
-          {loading && <p className="mt-2 text-blue-600 font-semibold">Uploading image...</p>}
+          {loading && <p className="mt-2 text-sky-700 font-semibold">Uploading image...</p>}
           {formData.task_image_url && !loading && (
             <img
               src={formData.task_image_url}
               alt="Uploaded Task"
-              className="mt-3 max-h-48 rounded-lg"
+              className="mt-3 max-h-48 rounded-lg border border-white"
             />
           )}
         </div>
@@ -261,7 +262,7 @@ const AddTask = () => {
         <button
           type="submit"
           disabled={loading}
-          className={`btn btn-primary w-full ${loading ? "opacity-70" : ""} py-3`}
+          className={`btn btn-primary w-full ${loading ? "opacity-70" : ""} py-3 text-lg font-semibold`}
         >
           {loading ? "Please wait..." : "Add Task"}
         </button>
