@@ -63,55 +63,65 @@ const Withdrawal = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      <div className="bg-gradient-to-br from-blue-100 to-purple-200 p-8 rounded-2xl shadow-xl">
-        <h2 className="text-4xl font-bold text-center text-gray-800 mb-6">💸 Withdrawal Request</h2>
+    <div className="min-h-screen bg-gray-700 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-gray-800 rounded-3xl shadow-2xl p-10">
+        <h2 className="text-4xl font-extrabold text-center text-white mb-8">
+          💸 Withdrawal Request
+        </h2>
 
         {errorMessage && (
-          <div className="bg-red-100 border border-red-400 text-red-700 p-3 rounded mb-4 text-center">
+          <div className="bg-red-600 text-red-100 p-4 rounded-lg mb-6 text-center font-semibold">
             {errorMessage}
           </div>
         )}
 
-        <div className="bg-white p-6 rounded-xl shadow-md mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <p className="text-lg text-gray-700">
-            <span className="font-bold">Your Coin Balance:</span> <span className="text-blue-600">{coin}</span> coins
+        <div className="bg-gray-700 p-6 rounded-2xl shadow-md mb-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <p className="text-lg text-gray-200">
+            <span className="font-bold">Your Coin Balance:</span>{" "}
+            <span className="text-gray-400">{coin}</span> coins
           </p>
-          <p className="text-lg text-gray-700">
+          <p className="text-lg text-gray-200">
             <span className="font-bold">You Can Withdraw:</span>{" "}
-            <span className="text-green-600">${Math.floor(coin / 20)}</span> USD
+            <span className="text-green-400">${Math.floor(coin / 20)}</span> USD
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-6">
           <div>
-            <label className="block text-gray-800 font-semibold mb-1">Coins to Withdraw</label>
+            <label className="block text-gray-200 font-semibold mb-2">
+              Coins to Withdraw
+            </label>
             <input
               type="number"
               value={withdrawalCoin}
               onChange={handleCoinChange}
-              className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 rounded-xl border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
               min="1"
+              placeholder="Enter coins to withdraw"
               required
             />
           </div>
 
           <div>
-            <label className="block text-gray-800 font-semibold mb-1">Withdrawal Amount ($)</label>
+            <label className="block text-gray-200 font-semibold mb-2">
+              Withdrawal Amount ($)
+            </label>
             <input
               type="number"
               value={withdrawalAmount}
               readOnly
-              className="w-full p-3 rounded-lg border border-gray-200 bg-gray-100 text-gray-600"
+              className="w-full p-4 rounded-xl border border-gray-600 bg-gray-600 text-gray-200"
             />
           </div>
 
           <div>
-            <label className="block text-gray-800 font-semibold mb-1">Payment System</label>
+            <label className="block text-gray-200 font-semibold mb-2">
+              Payment System
+            </label>
             <select
               value={paymentSystem}
               onChange={(e) => setPaymentSystem(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 rounded-xl border border-gray-600 bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-gray-400"
               required
             >
               <option value="" disabled className="text-gray-400">
@@ -126,26 +136,31 @@ const Withdrawal = () => {
           </div>
 
           <div>
-            <label className="block text-gray-800 font-semibold mb-1">Account Number</label>
+            <label className="block text-gray-200 font-semibold mb-2">
+              Account Number
+            </label>
             <input
               type="text"
               value={accountNumber}
               onChange={(e) => setAccountNumber(e.target.value)}
-              className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-4 rounded-xl border border-gray-600 bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              placeholder="Enter account number"
               required
             />
           </div>
 
-          <div className="mt-4">
+          <div className="mt-6">
             {withdrawalCoin >= 200 ? (
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold text-lg rounded-lg hover:opacity-90 transition"
+                className="w-full py-4 bg-gradient-to-r from-gray-400 to-gray-600 text-gray-900 font-bold text-lg rounded-2xl shadow-lg hover:opacity-90 transition duration-300"
               >
                 Submit Withdrawal
               </button>
             ) : (
-              <p className="text-red-500 font-medium text-center">Minimum 200 coins required to withdraw.</p>
+              <p className="text-red-400 font-medium text-center">
+                Minimum 200 coins required to withdraw.
+              </p>
             )}
           </div>
         </form>
