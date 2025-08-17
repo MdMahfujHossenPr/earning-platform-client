@@ -42,7 +42,7 @@ const PaymentHistory = () => {
 
   if (loading)
     return (
-      <div className="text-center p-10 text-gray-500 text-lg font-semibold">
+      <div className="text-center p-10 text-gray-200 text-lg font-semibold">
         Loading payment history...
       </div>
     );
@@ -55,22 +55,17 @@ const PaymentHistory = () => {
     );
 
   return (
-    <div className="payment-history max-w-6xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-12">
-      <h2 className="text-4xl font-extrabold text-blue-800 mb-10 text-center tracking-wide">
+    <div className="payment-history min-h-screen max-w-6xl mx-auto p-8 mt-12">
+      <h2 className="text-4xl font-extrabold text-white mb-10 text-center tracking-wide">
         Payment History
       </h2>
 
       {payments.length > 0 ? (
-        <div className="overflow-x-auto rounded-lg border border-gray-300 shadow-sm">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-blue-600">
+        <div className="overflow-x-auto rounded-lg border border-gray-600 shadow-md">
+          <table className="min-w-full divide-y divide-gray-600">
+            <thead className="bg-gray-800">
               <tr>
-                {[
-                  "Amount ($)",
-                  "Coins",
-                  "Payment Date",
-                  "Status",
-                ].map((header) => (
+                {["Amount ($)", "Coins", "Payment Date", "Status"].map((header) => (
                   <th
                     key={header}
                     className="px-6 py-4 text-left text-white text-lg font-semibold tracking-wide select-none"
@@ -89,15 +84,15 @@ const PaymentHistory = () => {
                 return (
                   <tr
                     key={payment._id}
-                    className={idx % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                    className={idx % 2 === 0 ? "bg-gray-600" : "bg-gray-700"}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-900 font-medium text-base">
+                    <td className="px-6 py-4 whitespace-nowrap text-white font-medium text-base">
                       ${payment.amount.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-700 text-base">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-200 text-base">
                       {payment.coin}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-700 text-base">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-200 text-base">
                       {new Date(payment.createdAt || payment.payment_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -114,7 +109,7 @@ const PaymentHistory = () => {
           </table>
         </div>
       ) : (
-        <p className="text-center text-gray-500 italic mt-16 text-lg font-medium">
+        <p className="text-center text-gray-300 italic mt-16 text-lg font-medium">
           No payment history found.
         </p>
       )}

@@ -90,96 +90,98 @@ const PurchaseCoin = () => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-xl shadow-lg mt-8">
-      <h2 className="text-3xl font-extrabold text-center text-blue-700 mb-10">
-        Purchase Coins
-      </h2>
+    <div className="min-h-screen bg-gray-600 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl w-full bg-gray-700 rounded-2xl shadow-xl p-8 sm:p-12">
+        <h2 className="text-3xl font-extrabold text-center text-white mb-10">
+          Purchase Coins
+        </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        {coinOptions.map(({ coins, price }) => (
-          <div
-            key={coins}
-            onClick={() => !loading && handlePayment({ coins, price })}
-            className={`cursor-pointer rounded-xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300
-              ${
-                selectedCoin?.coins === coins
-                  ? "border-4 border-blue-500 bg-blue-50"
-                  : "border border-gray-300 bg-gray-100"
-              }`}
-          >
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{coins} Coins</h3>
-            <p className="text-gray-600 text-lg">${price}</p>
-          </div>
-        ))}
-      </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          {coinOptions.map(({ coins, price }) => (
+            <div
+              key={coins}
+              onClick={() => !loading && handlePayment({ coins, price })}
+              className={`cursor-pointer rounded-2xl p-6 shadow-md hover:shadow-xl transition-shadow duration-300
+                ${
+                  selectedCoin?.coins === coins
+                    ? "border-4 border-white bg-gray-600"
+                    : "border border-gray-500 bg-gray-700"
+                }`}
+            >
+              <h3 className="text-xl font-bold text-white mb-2">{coins} Coins</h3>
+              <p className="text-gray-300 text-lg">${price}</p>
+            </div>
+          ))}
+        </div>
 
-      {clientSecret && (
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="p-4 border border-gray-300 rounded-lg shadow-inner bg-white">
-            <CardElement
-              options={{
-                style: {
-                  base: {
-                    fontSize: "16px",
-                    color: "#1e40af", // blue-800
-                    letterSpacing: "0.025em",
-                    "::placeholder": {
-                      color: "#93c5fd", // blue-300
+        {clientSecret && (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-4 border border-gray-500 rounded-lg shadow-inner bg-gray-600">
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: "16px",
+                      color: "#ffffff",
+                      letterSpacing: "0.025em",
+                      "::placeholder": {
+                        color: "#d1d5db",
+                      },
+                    },
+                    invalid: {
+                      color: "#f87171",
                     },
                   },
-                  invalid: {
-                    color: "#dc2626", // red-600
-                  },
-                },
-              }}
-            />
-          </div>
+                }}
+              />
+            </div>
 
-          {error && (
-            <div className="text-center text-red-600 font-semibold">{error}</div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 text-white rounded-lg font-semibold
-              bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 transition duration-300
-              ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
-          >
-            {loading ? (
-              <span className="inline-flex items-center justify-center animate-spin">
-                <svg
-                  className="w-6 h-6 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
-                  />
-                </svg>
-                <span className="ml-2">Processing...</span>
-              </span>
-            ) : (
-              "Complete Payment"
+            {error && (
+              <div className="text-center text-red-400 font-semibold">{error}</div>
             )}
-          </button>
-        </form>
-      )}
 
-      {loading && !clientSecret && (
-        <p className="text-center text-gray-600 mt-4 font-medium">Processing...</p>
-      )}
+            <button
+              type="submit"
+              disabled={loading}
+              className={`w-full py-3 text-white rounded-xl font-semibold
+                bg-gray-800 hover:bg-gray-900 focus:ring-4 focus:ring-gray-400 transition duration-300
+                ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+            >
+              {loading ? (
+                <span className="inline-flex items-center justify-center animate-spin">
+                  <svg
+                    className="w-6 h-6 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 010 16v-4l-3 3 3 3v-4a8 8 0 01-8-8z"
+                    />
+                  </svg>
+                  <span className="ml-2">Processing...</span>
+                </span>
+              ) : (
+                "Complete Payment"
+              )}
+            </button>
+          </form>
+        )}
+
+        {loading && !clientSecret && (
+          <p className="text-center text-gray-300 mt-4 font-medium">Processing...</p>
+        )}
+      </div>
     </div>
   );
 };

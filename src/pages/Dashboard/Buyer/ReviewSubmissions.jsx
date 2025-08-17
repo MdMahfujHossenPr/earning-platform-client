@@ -67,23 +67,23 @@ const ReviewSubmissions = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-r from-blue-50 via-white to-blue-50">
-      <h2 className="text-4xl font-extrabold mb-8 text-center text-blue-800 tracking-wide drop-shadow-md">
+    <div className="min-h-screen p-6 bg-gray-600">
+      <h2 className="text-4xl font-extrabold mb-8 text-center text-white tracking-wide drop-shadow-md">
         Pending Submissions
       </h2>
 
       {loading ? (
-        <div className="text-center text-lg text-blue-600 font-semibold animate-pulse">
+        <div className="text-center text-lg text-gray-200 font-semibold animate-pulse">
           Loading...
         </div>
       ) : submissions.length === 0 ? (
-        <div className="text-center text-gray-500 text-xl italic font-medium">
+        <div className="text-center text-gray-300 text-xl italic font-medium">
           No pending submissions.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-lg shadow-lg border border-blue-200 mx-auto max-w-7xl">
-          <table className="min-w-full divide-y divide-blue-200">
-            <thead className="bg-blue-600 text-white">
+        <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-500 mx-auto max-w-7xl bg-gray-700/50 backdrop-blur-md">
+          <table className="min-w-full divide-y divide-gray-500">
+            <thead className="bg-gray-800/90 text-white">
               <tr>
                 {["Worker Name", "Task Title", "Payable Amount", "Action"].map(
                   (header) => (
@@ -102,16 +102,18 @@ const ReviewSubmissions = () => {
                 <tr
                   key={sub._id}
                   className={`${
-                    idx % 2 === 0 ? "bg-blue-50" : "bg-white"
-                  } hover:bg-blue-100 transition-colors duration-150 cursor-pointer`}
+                    idx % 2 === 0 ? "bg-gray-700/40" : "bg-gray-700/20"
+                  } hover:bg-gray-600/50 transition-colors duration-150 cursor-pointer`}
                 >
-                  <td className="px-6 py-4 text-blue-900 font-semibold whitespace-normal max-w-xs break-words">
+                  <td className="px-6 py-4 text-white font-semibold whitespace-normal max-w-xs break-words">
                     {sub.worker_name}
                   </td>
-                  <td className="px-6 py-4 text-blue-800 whitespace-normal max-w-sm break-words">
+                  <td className="px-6 py-4 text-gray-200 whitespace-normal max-w-sm break-words">
                     {sub.task_title}
                   </td>
-                  <td className="px-6 py-4 text-blue-700 font-medium">${sub.payable_amount}</td>
+                  <td className="px-6 py-4 text-green-400 font-medium">
+                    ${sub.payable_amount}
+                  </td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => {
@@ -137,28 +139,28 @@ const ReviewSubmissions = () => {
           onClick={() => setModalOpen(false)}
         >
           <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 relative"
+            className="bg-gray-700/70 rounded-xl shadow-xl max-w-md w-full p-6 relative backdrop-blur-md"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 className="text-2xl font-bold mb-4 text-blue-900">
+            <h3 className="text-2xl font-bold mb-4 text-white">
               Submission Details
             </h3>
 
             <p className="mb-2">
               <strong>Worker:</strong>{" "}
-              <span className="text-blue-700">{selected.worker_name}</span>
+              <span className="text-gray-200">{selected.worker_name}</span>
             </p>
             <p className="mb-2">
               <strong>Task:</strong>{" "}
-              <span className="text-blue-700">{selected.task_title}</span>
+              <span className="text-gray-200">{selected.task_title}</span>
             </p>
             <p className="mb-2 whitespace-pre-wrap">
               <strong>Details:</strong>{" "}
-              <span className="text-blue-600">{selected.submission_details}</span>
+              <span className="text-gray-300">{selected.submission_details}</span>
             </p>
             <p className="mb-4">
               <strong>Payable:</strong>{" "}
-              <span className="text-green-600 font-semibold">
+              <span className="text-green-400 font-semibold">
                 ${selected.payable_amount}
               </span>
             </p>
@@ -178,7 +180,7 @@ const ReviewSubmissions = () => {
               </button>
               <button
                 onClick={() => setModalOpen(false)}
-                className="flex-1 bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded shadow transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
+                className="flex-1 bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded shadow transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400"
               >
                 Close
               </button>
