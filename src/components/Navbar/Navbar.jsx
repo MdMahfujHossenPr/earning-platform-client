@@ -1,24 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { FaCoins, FaSignOutAlt, FaUserCircle, FaBell } from "react-icons/fa";
-import { useAuth } from "../../context/AuthContext"; // AuthContext import করা হয়েছে
-import { showToast } from "../../utils/showToast"; // Toast show করার জন্য
-import useRole from "../../hooks/useRole"; // useRole হুক ইম্পোর্ট
-import { getNotifications } from "../../services/notification.service"; // Notification service import করা হয়েছে
+import {
+  FaCoins,
+  FaSignOutAlt,
+  FaUserCircle,
+  FaBell,
+  FaBars,
+  FaTimes,
+} from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
+import { showToast } from "../../utils/showToast";
+import useRole from "../../hooks/useRole";
+import { getNotifications } from "../../services/notification.service";
 
 const Navbar = () => {
-  const { user, logout } = useAuth(); // Auth context থেকে user এবং logout function
-  const { role, coin, loading } = useRole(); // useRole হুক থেকে role, coin এবং loading অবস্থা
+  const { user, logout } = useAuth();
+  const { role, coin, loading } = useRole();
   const navigate = useNavigate();
+
   const [scrollY, setScrollY] = useState(0);
-  const [loadingState, setLoadingState] = useState(false); // Loading state for logout
-  const [notifications, setNotifications] = useState([]); // State to store notifications
-  const [newNotificationCount, setNewNotificationCount] = useState(0); // Counter for new notifications
-  const [showNotifications, setShowNotifications] = useState(false); // To toggle notification dropdown visibility
+  const [loadingState, setLoadingState] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [newNotificationCount, setNewNotificationCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const notifRef = useRef(null);
+  const mobileMenuRef = useRef(null);
 
   useEffect(() => {
     if (user) {
-      navigate("/dashboard"); // User login হয়ে গেলে ড্যাশবোর্ডে রিডাইরেক্ট
+      navigate("/dashboard");
     }
   }, [user, navigate]);
 
@@ -30,233 +42,432 @@ const Navbar = () => {
 
   useEffect(() => {
     if (user) {
-      fetchNotifications(); // Fetch notifications when user is logged in
+      fetchNotifications();
     }
   }, [user]);
 
-  // Fetch notifications using the service function
+  useEffect(() => {
+    // Close dropdowns when clicking outside
+    const handleClickOutside = (event) => {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+      if (
+        mobileMenuRef.current &&
+        !mobileMenuRef.current.contains(event.target)
+      ) {
+        setMobileMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const fetchNotifications = async () => {
     try {
-      const data = await getNotifications(user.email); // Get notifications using the service
+      const data = await getNotifications(user.email);
       setNotifications(data);
-      setNewNotificationCount(data.filter(notification => !notification.read).length); // Set unread notifications count
+      setNewNotificationCount(data.filter((n) => !n.read).length);
     } catch (error) {
       console.error("Error fetching notifications", error);
     }
   };
 
   const handleLogout = async () => {
-    setLoadingState(true); // Logout হওয়ার সময় loading শুরু হবে
-    await logout(); // Logout function call
+    setLoadingState(true);
+    await logout();
     showToast("Logged out successfully", "success");
     navigate("/login");
-    setLoadingState(false); // Logout হওয়ার পর loading শেষ হবে
+    setLoadingState(false);
   };
 
-  // Toggle the notifications dropdown
   const toggleNotifications = () => {
-    setShowNotifications(!showNotifications); // Toggle notification dropdown visibility
+    setShowNotifications((prev) => !prev);
     if (!showNotifications) {
-      fetchNotifications(); // Fetch notifications when the dropdown is shown
+      fetchNotifications();
     }
+  };
+
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen((prev) => !prev);
   };
 
   return (
     <header
-      className={`fixed top-0 z-50 w-full transition-all duration-300 ${scrollY > 30 ? "bg-gray-900 shadow-md" : "bg-gray-900 bg-opacity-90"}`}
+      className={`fixed top-0 z-50 w-full transition-all duration-300 ${
+        scrollY > 30 ? "bg-gray-900 shadow-md" : "bg-gray-900 bg-opacity-90"
+      }`}
     >
-      <div className="navbar px-6 py-3 max-w-7xl mx-auto">
-        {/* Left Navbar */}
-        <div className="navbar-start">
-          <Link
-            to="/"
-            className="text-white text-2xl font-bold tracking-wide hover:text-blue-400 transition-colors"
+      <div className="px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Left: Logo */}
+          <div className="flex-shrink-0 flex items-center space-x-2">
+            <Link
+              to="/"
+              className="flex items-center space-x-2 text-white hover:text-blue-400 transition-colors"
+              aria-label="MicroTasks Home"
+            >
+              <img
+                src="/logos.png"
+                alt="Logo"
+                className="w-10 h-10 rounded-full border-2 border-white bg-black object-contain"
+              />
+              <span className="font-bold text-xl tracking-wide select-none">
+                MicroTasks
+              </span>
+            </Link>
+          </div>
+
+          {/* Center: Desktop Links */}
+          <nav className="hidden lg:flex space-x-6 font-medium text-white">
+            <a
+              href="https://github.com/MdMahfujHossenPr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-sm bg-gray-800 text-white font-semibold hover:bg-gray-900 transition"
+            >
+              Join as Developer
+            </a>
+          </nav>
+
+          {/* Right: User Menu & Icons */}
+          <div className="flex items-center space-x-4">
+            {!user ? (
+              <>
+                <NavLink
+                  to="/login"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "btn btn-sm bg-gray-800 text-white font-semibold"
+                      : "btn btn-sm bg-gray-800 text-white hover:bg-gray-900 transition"
+                  }
+                >
+                  Login
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "btn btn-sm bg-gray-800 text-white font-semibold"
+                      : "btn btn-sm bg-gray-800 text-white hover:bg-gray-900 transition"
+                  }
+                >
+                  Register
+                </NavLink>
+              </>
+            ) : (
+              <>
+                <div className="hidden md:flex items-center space-x-6">
+                  <NavLink
+                    to="/dashboard"
+                    className={({ isActive }) =>
+                      isActive
+                        ? "text-blue-300 font-semibold underline"
+                        : "hover:text-blue-400 transition-colors"
+                    }
+                    aria-current={({ isActive }) =>
+                      isActive ? "page" : undefined
+                    }
+                  >
+                    Dashboard
+                  </NavLink>
+
+                  <div
+                    className="flex items-center gap-1 text-blue-400 select-none"
+                    title="Coins"
+                  >
+                    <FaCoins />
+                    <span>{coin}</span>
+                  </div>
+
+                  {role && (
+                    <div
+                      className="text-gray-400 text-sm select-none"
+                      title="User Role"
+                    >
+                      {role}
+                    </div>
+                  )}
+                </div>
+
+                {/* Notification */}
+                <div className="relative" ref={notifRef}>
+                  <button
+                    onClick={toggleNotifications}
+                    aria-haspopup="true"
+                    aria-expanded={showNotifications}
+                    aria-label="Notifications"
+                    className="text-white text-xl focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+                  >
+                    <FaBell />
+                    {newNotificationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-600 text-white rounded-full text-xs px-2 py-0.5 font-semibold select-none">
+                        {newNotificationCount}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifications && (
+                    <div
+                      className="absolute right-0 mt-2 w-80 p-4 bg-gray-800 rounded-md shadow-lg text-white max-h-96 overflow-y-auto z-50"
+                      role="menu"
+                      aria-label="Notifications"
+                    >
+                      <h4 className="font-semibold text-lg mb-2">
+                        Notifications
+                      </h4>
+                      {notifications.length > 0 ? (
+                        notifications.map((notification, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between items-center py-2 border-b border-gray-600"
+                          >
+                            <p className="truncate">{notification.message}</p>
+                            <time
+                              className="text-xs text-gray-400 ml-2 whitespace-nowrap"
+                              dateTime={notification.time}
+                            >
+                              {new Date(notification.time).toLocaleString()}
+                            </time>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center text-gray-400">
+                          No notifications available.
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* User Avatar Dropdown */}
+                <div className="dropdown dropdown-end relative">
+                  <button
+                    tabIndex={0}
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    className="btn btn-ghost btn-circle avatar focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
+                    aria-label="User menu"
+                  >
+                    <img
+                      src={user?.profilePicture || "/default-avatar.png"}
+                      alt="User Avatar"
+                      className="w-10 h-10 rounded-full object-cover"
+                      onError={(e) => (e.target.src = "/default-avatar.png")}
+                    />
+                  </button>
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content menu menu-sm mt-3 p-2 shadow bg-gray-800 rounded-box w-48 text-blue-300 absolute right-0"
+                  >
+                    <li className="text-center text-sm font-semibold px-2 py-1 border-b border-blue-400 truncate">
+                      {user?.name || "User"}
+                    </li>
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-2 w-full px-4 py-2 text-left text-blue-300 hover:bg-blue-500 rounded-md transition"
+                      >
+                        <FaSignOutAlt />
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </>
+            )}
+
+            {/* Mobile menu button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="lg:hidden text-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded"
+              aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            >
+              {mobileMenuOpen ? <FaTimes size={22} /> : <FaBars size={22} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav
+            ref={mobileMenuRef}
+            className="lg:hidden bg-gray-900 bg-opacity-95 w-full shadow-md rounded-b-md mt-1 p-4 space-y-4 text-blue-300"
+            aria-label="Mobile menu"
           >
-            MicroTasks
-          </Link>
-        </div>
-
-        {/* Center Navbar Links */}
-        <div className="navbar-center hidden lg:flex">
-          <ul className="space-x-6 text-white font-medium">
-            <li>
-              <a
-                href="https://github.com/YOUR_GITHUB_CLIENT_REPO"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white font-semibold hover:underline"
-              >
-                <button className="btn btn-sm bg-gray-800 text-white font-semibold hover:bg-gray-900 transition">
-                  Join as Developer
-                </button>
-              </a>
-            </li>
-          </ul>
-        </div>
-
-        {/* Right Navbar */}
-        <div className="navbar-end flex items-center gap-4">
-          {!user ? (
-            <>
-              <NavLink
-                to="/login"
-                className={({ isActive }) =>
-                  isActive ? "btn btn-sm bg-gray-800 text-white font-semibold transition" : "btn btn-sm bg-gray-800 text-white hover:bg-gray-900 transition"
-                }
-              >
-                Login
-              </NavLink>
-
-              <NavLink
-                to="/register"
-                className={({ isActive }) =>
-                  isActive ? "btn btn-sm bg-gray-800 text-white font-semibold transition" : "btn btn-sm bg-gray-800 text-white hover:bg-gray-900 transition"
-                }
-              >
-                Register
-              </NavLink>
-            </>
-          ) : (
-            <>
-              {/* Profile and Dashboard Links */}
-              <div className="flex items-center gap-4">
+            {!user ? (
+              <>
+                <NavLink
+                  to="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Login
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded hover:bg-blue-700 transition"
+                >
+                  Register
+                </NavLink>
+              </>
+            ) : (
+              <>
+                {/* Common */}
                 <NavLink
                   to="/dashboard"
-                  className={({ isActive }) =>
-                    isActive ? "text-blue-300 font-semibold underline" : "hover:text-blue-400 transition-colors"
-                  }
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block px-3 py-2 rounded hover:bg-blue-700 transition font-semibold"
                 >
                   Dashboard
                 </NavLink>
 
-                {/* Coin Display */}
-                <div className="flex items-center gap-2 text-blue-400">
-                  <FaCoins />
-                  <span>{coin}</span> {/* Display coins based on role */}
-                </div>
-
-                {/* Role-based Display */}
-                {role && <div className="text-gray-400 text-sm">{role}</div>} {/* Display user role */}
-              </div>
-
-              {/* Notification Icon */}
-              <div className="relative">
-                <FaBell
-                  className="text-white text-xl cursor-pointer"
-                  onClick={toggleNotifications} // Toggle notification dropdown visibility
-                />
-                {newNotificationCount > 0 && (
-                  <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs px-2 py-1">
-                    {newNotificationCount}
-                  </span>
-                )}
-                {showNotifications && (
-                  <div className="absolute right-0 mt-2 w-80 p-4 bg-gray-800 rounded-md shadow-lg text-white">
-                    <h4 className="font-semibold text-lg">Notifications</h4>
-                    {notifications.length > 0 ? (
-                      notifications.map((notification, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-center py-2 border-b border-gray-600"
-                        >
-                          <span>{notification.message}</span>
-                          <span className="text-sm text-gray-400">
-                            {new Date(notification.time).toLocaleString()}
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <div>No notifications available.</div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* User Avatar and Logout */}
-              <div className="dropdown dropdown-end">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-ghost btn-circle avatar focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-full"
-                >
-                  <div className="w-10 rounded-full ring ring-blue-400 ring-offset-base-100 ring-offset-2">
-                    <img
-                      src={user?.profilePicture || "/default-avatar.png"} // Fallback image path
-                      alt="User Avatar"
-                      className="object-cover rounded-full"
-                      onError={(e) => (e.target.src = "/default-avatar.png")}
-                    />
-                  </div>
-                </div>
-                <ul
-                  tabIndex={0}
-                  className="mt-3 p-2 shadow menu menu-sm dropdown-content bg-gray-800 rounded-box w-48 text-blue-300"
-                >
-                  <li className="text-center text-sm font-semibold px-2 py-1 border-b border-blue-400 truncate">
-                    {user?.name || "User"}
-                  </li>
-                  <li>
-                    <button
-                      onClick={handleLogout}
-                      className="flex items-center gap-2 w-full px-4 py-2 text-left text-blue-300 hover:bg-blue-500 rounded-md transition"
+                {/* Buyer Routes */}
+                {role === "Buyer" && (
+                  <>
+                    <NavLink
+                      to="/dashboard/buyer-home"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
                     >
-                      <FaSignOutAlt />
-                      Logout
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </>
-          )}
-        </div>
+                      Buyer Home
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/add-task"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Add Task
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/my-tasks"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      My Tasks
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/buyer/payment-history"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Payment History
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/purchase-coin"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Purchase Coin
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/review-submissions"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Review Submissions
+                    </NavLink>
+                  </>
+                )}
 
-        {/* Mobile Navbar */}
-        <div className="dropdown lg:hidden ml-2">
-          <label tabIndex={0} className="btn btn-square btn-ghost">
-            <svg
-              className="w-6 h-6 text-blue-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          </label>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content mt-3 p-2 shadow bg-gray-900 rounded-box w-52 text-blue-300"
-          >
-            {!user ? (
-              <>
-                <li>
-                  <NavLink to="/login">Login</NavLink>
-                </li>
-                <li>
-                  <NavLink to="/register">Register</NavLink>
-                </li>
+                {/* Worker Routes */}
+                {role === "Worker" && (
+                  <>
+                    <NavLink
+                      to="/dashboard/worker-home"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Worker Home
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/worker/my-submissions"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      My Submissions
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/task-details/1"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Task Details
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/task-list"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Task List
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/withdrawals"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Withdrawals
+                    </NavLink>
+                  </>
+                )}
+
+                {/* Admin Routes */}
+                {role === "Admin" && (
+                  <>
+                    <NavLink
+                      to="/dashboard/admin-home"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Admin Home
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/manage-tasks"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Manage Tasks
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/manage-users"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Manage Users
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/withdraw-requests"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block px-3 py-2 hover:bg-gray-700 rounded"
+                    >
+                      Withdraw Requests
+                    </NavLink>
+                  </>
+                )}
+
+                <button
+                  onClick={() => {
+                    handleLogout();
+                    setMobileMenuOpen(false);
+                  }}
+                  className="block w-full text-left px-3 py-2 rounded hover:bg-red-600 transition text-red-300"
+                >
+                  Logout
+                </button>
               </>
-            ) : (
-              <div>
-                <li>
-                  <NavLink to="/dashboard">Dashboard</NavLink>
-                </li>
-                <li className="flex items-center gap-1">
-                  <FaCoins />
-                  <span>{coin}</span>
-                </li>
-                <li>
-                  <button onClick={handleLogout}>Logout</button>
-                </li>
-              </div>
             )}
-          </ul>
-        </div>
+
+            <a
+              href="https://github.com/MdMahfujHossenPr"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block px-3 py-2 rounded hover:bg-gray-700 transition"
+            >
+              Join as Developer
+            </a>
+          </nav>
+        )}
       </div>
     </header>
   );

@@ -160,7 +160,7 @@ const TaskDetails = () => {
         <form onSubmit={handleSubmit} className="mt-10">
           <label className="block mb-2 text-lg font-semibold text-gray-800">✍️ Submit Your Work</label>
           <textarea
-            className="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-4 text-black border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
             placeholder="Write your submission details here..."
             rows={5}
             value={submissionDetails}

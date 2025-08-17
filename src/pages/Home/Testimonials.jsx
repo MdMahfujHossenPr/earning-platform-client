@@ -10,21 +10,21 @@ const testimonials = [
     name: "John Carter",
     message:
       "This platform completely changed the way I earn online. Reliable, fast, and user-friendly.",
-    image: "https://i.ibb.co/Y3tr0h6/user1.jpg",
+    image: "https://i.ibb.co/Rkdh6phJ/profile-pic1.jpg",
   },
   {
     id: 2,
     name: "Sara Collins",
     message:
       "I was able to earn extra money while studying. The interface is so smooth and clean!",
-    image: "https://i.ibb.co/XkzNmWX/user2.jpg",
+    image: "https://i.ibb.co/NnjtVjw8/profile-three.jpg",
   },
   {
     id: 3,
     name: "Leo Williams",
     message:
       "Tasks are simple yet rewarding. I recommend it to everyone who wants legit income.",
-    image: "https://i.ibb.co/LRdNsWj/user3.jpg",
+    image: "https://i.ibb.co/Q7mvxFCb/Screenshot-2025-05-14-102943.png",
   },
 ];
 

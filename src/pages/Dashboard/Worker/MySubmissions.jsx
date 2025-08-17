@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { getPendingSubmissions } from "../../../services/submission.service";
-import { showToast } from "../../../utils/showToast";
 
 const MySubmissions = () => {
   const { user } = useAuth();
@@ -17,11 +16,14 @@ const MySubmissions = () => {
 
     const fetchSubmissions = async () => {
       try {
-        const data = await getPendingSubmissions(user.uid);
-        setSubmissions(data);
-      } catch (error) {
-        console.error("Failed to fetch submissions:", error);
-        setError("There was an error fetching your submissions.");
+        const allSubmissions = await getPendingSubmissions(user.uid);
+        const userSubmissions = allSubmissions.filter(
+          (sub) => sub.worker_email === user.email
+        );
+        setSubmissions(userSubmissions);
+      } catch (err) {
+        console.error("Error fetching submissions:", err);
+        setError("Failed to load submissions.");
       } finally {
         setLoading(false);
       }
@@ -40,7 +42,7 @@ const MySubmissions = () => {
 
   if (error) {
     return (
-      <div className="p-4 bg-red-100 text-red-700 rounded-lg mb-4 text-center font-semibold shadow">
+      <div className="p-4 bg-red-100 text-red-700 rounded-lg text-center shadow">
         {error}
       </div>
     );
@@ -48,8 +50,8 @@ const MySubmissions = () => {
 
   if (!user) {
     return (
-      <div className="p-6 text-center bg-yellow-100 text-yellow-700 rounded-lg font-medium shadow">
-        Please log in to see your submissions.
+      <div className="p-6 bg-yellow-100 text-yellow-800 text-center rounded-lg shadow">
+        Please log in to view your submissions.
       </div>
     );
   }
@@ -61,7 +63,7 @@ const MySubmissions = () => {
       </h2>
 
       {submissions.length === 0 ? (
-        <div className="p-6 text-center bg-blue-100 text-blue-700 rounded-lg font-medium shadow">
+        <div className="p-6 bg-blue-100 text-blue-700 text-center rounded-lg shadow">
           No submissions found. Start completing tasks to earn coins!
         </div>
       ) : (
@@ -69,58 +71,54 @@ const MySubmissions = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Task Title</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Amount</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Buyer</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Status</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Date</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Worker</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider">Details</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Title</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Amount</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Buyer</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Status</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Date</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Worker</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold uppercase">Details</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-100">
-              {submissions
-                .filter((sub) => sub.worker_email === user.email)
-                .map((sub) => (
-                  <tr
-                    key={sub._id}
-                    className={`transition duration-200 hover:bg-blue-50 ${
-                      sub.status === "approved"
-                        ? "bg-green-50"
-                        : sub.status === "rejected"
-                        ? "bg-red-50"
-                        : ""
-                    }`}
-                  >
-                    <td className="px-4 py-3 text-sm text-gray-800">{sub.task_title}</td>
-                    <td className="px-4 py-3 text-sm text-gray-800">{sub.payable_amount}</td>
-                    <td className="px-4 py-3 text-sm text-gray-800">{sub.buyer_name || "No buyer"}</td>
-                    <td className="px-4 py-3 text-sm font-semibold">
-                      {sub.status === "pending" && (
-                        <span className="text-yellow-500">Pending</span>
-                      )}
-                      {sub.status === "approved" && (
-                        <span className="text-green-600">Approved</span>
-                      )}
-                      {sub.status === "rejected" && (
-                        <span className="text-red-500">Rejected</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {sub.createdAt
-                        ? new Date(sub.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                          })
-                        : "No date"}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">{sub.worker_name || "No worker"}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {sub.submission_details || "No details"}
-                    </td>
-                  </tr>
-                ))}
+              {submissions.map((sub) => (
+                <tr
+                  key={sub._id}
+                  className={`hover:bg-blue-50 transition ${
+                    sub.status === "approved"
+                      ? "bg-green-50"
+                      : sub.status === "rejected"
+                      ? "bg-red-50"
+                      : ""
+                  }`}
+                >
+                  <td className="px-4 py-3 text-sm">{sub.task_title}</td>
+                  <td className="px-4 py-3 text-sm">{sub.payable_amount}</td>
+                  <td className="px-4 py-3 text-sm">{sub.buyer_name || "N/A"}</td>
+                  <td className="px-4 py-3 text-sm font-bold">
+                    {sub.status === "pending" && (
+                      <span className="text-yellow-500">⏳ Pending</span>
+                    )}
+                    {sub.status === "approved" && (
+                      <span className="text-green-600">✅ Approved</span>
+                    )}
+                    {sub.status === "rejected" && (
+                      <span className="text-red-500">❌ Rejected</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {sub.createdAt
+                      ? new Date(sub.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "N/A"}
+                  </td>
+                  <td className="px-4 py-3 text-sm">{sub.worker_name || "N/A"}</td>
+                  <td className="px-4 py-3 text-sm">{sub.submission_details || "N/A"}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>

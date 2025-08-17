@@ -1,39 +1,46 @@
 import axios from "axios";
 import { useEffect } from "react";
-import { useAuth } from "../context/AuthContext"; // ✅ ঠিক path
+import { useAuth } from "../context/AuthContext";
+import Cookies from "js-cookie";
 
 const useAxiosSecure = () => {
-  const { user, logout } = useAuth(); // ✅ এখন আর undefined হবে না
+  const { logout } = useAuth();
 
   const axiosSecure = axios.create({
-    baseURL: import.meta.env.VITE_API_URL,
+    baseURL: "https://earning-platform-server-seven.vercel.app", // ✅ Server URL
+    withCredentials: true, // ✅ Necessary for cookie-based auth
   });
 
-  // Request interceptor to attach token
-  axiosSecure.interceptors.request.use(
-    (config) => {
-      const token = localStorage.getItem("access-token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    },
-    (error) => Promise.reject(error)
-  );
+  useEffect(() => {
+    // 👉 Attach token before request
+    const requestInterceptor = axiosSecure.interceptors.request.use(
+      (config) => {
+        const token = Cookies.get("access-token");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
 
-  // Response interceptor to handle auth errors
-  axiosSecure.interceptors.response.use(
-    (response) => response,
-    (error) => {
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        logout?.(); // ✅ logout আছে তো? optional chaining safe
+    // 👉 Handle 401 / 403 errors globally
+    const responseInterceptor = axiosSecure.interceptors.response.use(
+      (res) => res,
+      (err) => {
+        if ([401, 403].includes(err?.response?.status)) {
+          logout?.();
+        }
+        return Promise.reject(err);
       }
-      return Promise.reject(error);
-    }
-  );
+    );
+
+    // Cleanup
+    return () => {
+      axiosSecure.interceptors.request.eject(requestInterceptor);
+      axiosSecure.interceptors.response.eject(responseInterceptor);
+    };
+  }, [logout, axiosSecure]);
 
   return axiosSecure;
 };

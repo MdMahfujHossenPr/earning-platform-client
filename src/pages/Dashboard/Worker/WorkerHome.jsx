@@ -87,16 +87,16 @@ const WorkerHome = () => {
               <tr className="bg-gray-100 text-gray-700 text-sm uppercase tracking-wide">
                 <th className="px-6 py-3 text-left">Task Title</th>
                 <th className="px-6 py-3 text-left">Payable Amount</th>
-                <th className="px-6 py-3 text-left">Buyer Name</th>
+                <th className="px-6 py-3 text-left">Buyer Email</th>
                 <th className="px-6 py-3 text-left">Status</th>
               </tr>
             </thead>
             <tbody>
               {submissions.map((submission) => (
-                <tr key={submission._id} className="border-b hover:bg-gray-50">
+                <tr key={submission._id} className="border-b text-black hover:bg-gray-50">
                   <td className="px-6 py-4">{submission.task_title}</td>
                   <td className="px-6 py-4 font-medium">${submission.payable_amount}</td>
-                  <td className="px-6 py-4">{submission.buyer_name}</td>
+                  <td className="px-6 py-4">{submission.buyer_email}</td>
                   <td className="px-6 py-4">
                     {submission.status === "pending" && (
                       <span className="text-yellow-600 bg-yellow-100 px-3 py-1 rounded-full text-sm font-semibold">

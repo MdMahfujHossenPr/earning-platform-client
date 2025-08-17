@@ -25,13 +25,17 @@ const getAuthHeader = async () => {
  * @param {number} payableAmount - The amount to be paid to the worker for completing the task.
  * @returns {object} - Response data from the backend API after the submission is approved.
  */
-export const approveSubmission = async (submissionId, workerEmail, payableAmount) => {
+export const approveSubmission = async (
+  submissionId,
+  workerEmail,
+  payableAmount
+) => {
   try {
     const authHeader = await getAuthHeader(); // Get the auth header dynamically
 
     // Send a request to the backend to approve the submission
     const response = await axios.post(
-      `http://localhost:5000/api/submissions/${submissionId}/approve`, // Correct URL with submissionId in the path
+      `https://earning-platform-server-seven.vercel.app/api/submissions/${submissionId}/approve`, // Correct URL with submissionId in the path
       { workerEmail, payableAmount }, // Send necessary data in the body
       authHeader // Include the Authorization header
     );
@@ -55,7 +59,7 @@ export const rejectSubmission = async (submissionId, taskId) => {
 
     // Send a request to the backend to reject the submission
     const response = await axios.post(
-      `http://localhost:5000/api/submissions/${submissionId}/reject`, // Correct URL with submissionId
+      `https://earning-platform-server-seven.vercel.app/api/submissions/${submissionId}/reject`, // Correct URL with submissionId
       { submissionId, taskId }, // Send necessary data in the body
       authHeader // Include the Authorization header
     );
@@ -78,7 +82,7 @@ export const getPendingSubmissions = async (userId) => {
 
     // Fetch pending submissions from the backend
     const response = await axios.get(
-      "http://localhost:5000/api/submissions", // Backend endpoint for fetching submissions
+      "https://earning-platform-server-seven.vercel.app/api/submissions", // Backend endpoint for fetching submissions
       {
         params: { userId }, // Pass the userId as a query parameter
         headers: authHeader.headers, // Include Authorization header for validation
@@ -92,12 +96,11 @@ export const getPendingSubmissions = async (userId) => {
   }
 };
 
-
 export const getBuyerStats = async (userId) => {
   try {
     const authHeader = await getAuthHeader();
     const response = await axios.get(
-      `http://localhost:5000/api/buyer/${userId}/stats`, // তোমার API অনুযায়ী URL ঠিক করো
+      `https://earning-platform-server-seven.vercel.app/api/buyer/${userId}/stats`,
       authHeader
     );
     return response.data;
@@ -107,11 +110,9 @@ export const getBuyerStats = async (userId) => {
   }
 };
 
+
 export default {
   approveSubmission,
   rejectSubmission,
   getPendingSubmissions,
 };
-
-
- 

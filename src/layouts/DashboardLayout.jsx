@@ -9,7 +9,7 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="bg-gray-600 text-white min-h-screen">
+    <div className="bg-gray-600 text-white min-h-screen flex flex-col">
       {/* Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-gray-800 shadow">
         <Navbar
@@ -28,11 +28,11 @@ const DashboardLayout = () => {
       )}
 
       {/* Layout Container */}
-      <div className="pt-16 flex">
+      <div className="flex flex-1 pt-16">
         {/* Sidebar */}
         <aside
           className={` 
-            w-64 bg-gray-800 shadow-md z-40
+            w-64 bg-gray-900 shadow-md z-40
             transform transition-transform duration-300 ease-in-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
             fixed top-16 bottom-0 overflow-y-auto
@@ -44,10 +44,13 @@ const DashboardLayout = () => {
         </aside>
 
         {/* Main Content */}
-        <main
-          className="flex-1 ml-0   h-[calc(100vh-4rem)] overflow-y-auto p-4"
-        >
-          <Outlet />
+        <main className="flex-1 ml-0 h-[calc(100vh-4rem)] overflow-y-auto flex flex-col">
+          <div className="flex-1">
+            <Outlet />
+          </div>
+
+          {/* Footer */}
+          <Footer />
         </main>
       </div>
     </div>

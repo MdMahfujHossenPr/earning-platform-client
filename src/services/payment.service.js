@@ -1,11 +1,11 @@
-import axios from 'axios';  
-import { getAuth } from 'firebase/auth';
-import { showToast } from "../utils/showToast"; 
+import axios from "axios";
+import { getAuth } from "firebase/auth";
+import { showToast } from "../utils/showToast";
 
 // Helper function to get Authorization Header
 const getAuthHeader = async () => {
   const auth = getAuth();
-  if (!auth.currentUser) return {};  // If no user is logged in, return empty headers
+  if (!auth.currentUser) return {}; // If no user is logged in, return empty headers
   try {
     const token = await auth.currentUser.getIdToken();
     return {
@@ -14,15 +14,15 @@ const getAuthHeader = async () => {
       },
     };
   } catch (error) {
-    console.error('Error getting auth token:', error);
-    throw new Error('Failed to get authentication token');
+    console.error("Error getting auth token:", error);
+    throw new Error("Failed to get authentication token");
   }
 };
 
 // Create Payment Intent on Backend (Stripe)
 export const createPaymentIntent = async (amount, coin) => {
   try {
-    console.log('Creating payment intent with amount:', amount, coin);
+    console.log("Creating payment intent with amount:", amount, coin);
 
     // Convert to cents as Stripe expects the amount in cents
     const amountInCents = amount * 100;
@@ -31,21 +31,26 @@ export const createPaymentIntent = async (amount, coin) => {
 
     console.log("Sending to backend:", { amountInCents, coin });
     const response = await axios.post(
-      'http://localhost:5000/api/payment/create',
+      "https://earning-platform-server-seven.vercel.app/api/payment/create",
       { amount: amountInCents, coin },
       authHeader
     );
 
-    console.log('Payment Intent Response:', response.data);
-    return response.data;  // Ensure this returns the PaymentIntent ID
+    console.log("Payment Intent Response:", response.data);
+    return response.data; // Ensure this returns the PaymentIntent ID
   } catch (error) {
-    console.error('Error creating payment intent:', error);
-    throw new Error('Failed to create payment intent. Please try again.');
+    console.error("Error creating payment intent:", error);
+    throw new Error("Failed to create payment intent. Please try again.");
   }
 };
 
 // Complete Payment and Update Coins on Backend
-export const completePayment = async (paymentMethodId, paymentIntentId, userId, coins) => {
+export const completePayment = async (
+  paymentMethodId,
+  paymentIntentId,
+  userId,
+  coins
+) => {
   try {
     const authHeader = await getAuthHeader();
 
@@ -53,28 +58,26 @@ export const completePayment = async (paymentMethodId, paymentIntentId, userId, 
       paymentMethodId,
       paymentIntentId,
       userId,
-      coins
+      coins,
     });
 
     const response = await axios.post(
-      "http://localhost:5000/api/payments/complete-payment",
+      "https://earning-platform-server-seven.vercel.app/api/payments/complete-payment",
       {
         paymentMethodId,
-        paymentIntentId,  // Send PaymentIntent ID here
-        userId,            // Ensure you're passing the correct Firebase UID
+        paymentIntentId, // Send PaymentIntent ID here
+        userId, // Ensure you're passing the correct Firebase UID
         coins,
       },
       authHeader
     );
 
-    return response.data;  // Return response if successful
+    return response.data; // Return response if successful
   } catch (error) {
     console.error("Error completing payment:", error);
-    throw error;  // Rethrow the error for further handling
+    throw error; // Rethrow the error for further handling
   }
 };
-
-
 
 // Fetch payment history of a user
 export const getPaymentHistory = async (userId) => {
@@ -82,7 +85,7 @@ export const getPaymentHistory = async (userId) => {
 
   try {
     const response = await axios.get(
-      `http://localhost:5000/api/payments?userId=${userId}`,
+      `https://earning-platform-server-seven.vercel.app/api/payments?userId=${userId}`,
       await getAuthHeader()
     );
     return response.data;
@@ -91,5 +94,3 @@ export const getPaymentHistory = async (userId) => {
     throw new Error("Failed to fetch payment history");
   }
 };
-
-

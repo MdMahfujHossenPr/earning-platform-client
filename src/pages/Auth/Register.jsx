@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import Swal from "sweetalert2";
@@ -7,73 +7,56 @@ import { useAuth } from "../../context/AuthContext";
 const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
-    photoURL: null, // Store the image file here
+    photoURL: null,
     email: "",
     password: "",
-    role: "Worker", // Default role as "Worker"
+    role: "Worker",
   });
   const [errors, setErrors] = useState({ password: "", form: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { signup, googleLogin } = useAuth();
+  const fileInputRef = useRef(null); // ✅ Refs for file input
 
-  // Password validation function
   const validatePassword = (pwd) => {
     if (pwd.length < 6) return "Password must be at least 6 characters";
     if (!/[A-Z]/.test(pwd)) return "Must include at least one uppercase letter";
     return "";
   };
 
-  // Email validation function
   const validateEmail = (email) => {
     const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!regex.test(email)) return "Invalid email format";
     return "";
   };
 
-  // Handle form field changes
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Handle file change for photoURL (image upload)
   const handleFileChange = (e) => {
-    const file = e.target.files[0]; // Get the first selected file
+    const file = e.target.files[0];
     if (file) {
-      setFormData((prev) => ({
-        ...prev,
-        photoURL: file, // Store the file object in state
-      }));
+      setFormData((prev) => ({ ...prev, photoURL: file }));
     }
   };
 
-  // Upload image to ImgBB using the API key from .env
   const uploadImageToImgBB = async (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
 
     const response = await fetch(
-      `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMG_API_KEY}`, // Use import.meta.env for Vite
-      {
-        method: "POST",
-        body: formData,
-      }
+      `https://api.imgbb.com/1/upload?key=${import.meta.env.VITE_IMG_API_KEY}`,
+      { method: "POST", body: formData }
     );
-
     const data = await response.json();
-
-    if (data.success) {
-      return data.data.url; // Return the URL of the uploaded image
-    } else {
-      throw new Error("Image upload failed");
-    }
+    if (data.success) return data.data.url;
+    else throw new Error("Image upload failed");
   };
 
-  // Send user data to backend and store coins
   const sendUserToBackend = async (user, method, password = "") => {
     try {
-      const coinValue = formData.role === "Buyer" ? 50 : 10; // Assign 50 coins for Buyer, 10 for Worker
-
+      const coinValue = formData.role === "Buyer" ? 50 : 10;
       const userData = {
         name: user.displayName || formData.name,
         email: user.email,
@@ -85,18 +68,21 @@ const Register = () => {
         role: formData.role,
         coin: coinValue,
         googleId: user.googleId || null,
-        method: method, // Adding method here
+        method,
       };
 
       if (!userData.email || !userData.name || !userData.photoURL) {
         throw new Error("Missing required fields");
       }
 
-      const res = await fetch("http://localhost:5000/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
+      const res = await fetch(
+        "https://earning-platform-server-seven.vercel.app/api/users",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(userData),
+        }
+      );
 
       const data = await res.json();
 
@@ -113,12 +99,10 @@ const Register = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({ password: "", form: "" });
 
-    // Email and password validation
     const emailError = validateEmail(formData.email);
     if (emailError) {
       setErrors((prev) => ({ ...prev, form: emailError }));
@@ -135,8 +119,7 @@ const Register = () => {
 
     try {
       let uploadedPhotoURL = formData.photoURL;
-      if (formData.photoURL && formData.photoURL instanceof File) {
-        // If the user uploaded a file, upload it to ImgBB
+      if (formData.photoURL instanceof File) {
         uploadedPhotoURL = await uploadImageToImgBB(formData.photoURL);
       }
 
@@ -144,11 +127,10 @@ const Register = () => {
         formData.email,
         formData.password,
         formData.name,
-        uploadedPhotoURL // Use the uploaded photo URL
+        uploadedPhotoURL
       );
       const user = userCredential.user || {};
 
-      // Send user info to backend
       await sendUserToBackend(user, "manual", formData.password);
 
       Swal.fire({
@@ -158,8 +140,19 @@ const Register = () => {
         showConfirmButton: false,
       });
 
-      navigate("/"); // Redirect after registration
-      document.getElementById("photoURL").value = ""; // Clear file input after submit (optional)
+      // ✅ Reset form data and file input after success
+      setFormData({
+        name: "",
+        photoURL: null,
+        email: "",
+        password: "",
+        role: "Worker",
+      });
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ""; // ✅ Clear file input safely
+      }
+
+      navigate("/");
     } catch (err) {
       setErrors((prev) => ({ ...prev, form: err.message }));
       Swal.fire({
@@ -187,7 +180,7 @@ const Register = () => {
         showConfirmButton: false,
       });
 
-      navigate("/"); // Redirect after Google signup
+      navigate("/");
     } catch (err) {
       setErrors((prev) => ({ ...prev, form: err.message }));
       Swal.fire({
@@ -199,7 +192,7 @@ const Register = () => {
       setLoading(false);
     }
   };
-
+  
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-600 px-4">
       <div className="bg-gray-800 p-12 my-16 rounded-lg shadow-xl w-full max-w-3xl border-8 border-white transform transition-all duration-300 ease-in-out hover:scale-105">
@@ -243,10 +236,12 @@ const Register = () => {
             <input
               id="photoURL"
               name="photoURL"
-              type="file" // Change input type to 'file'
-              onChange={handleFileChange} // Handle file change
+              type="file"
+              onChange={handleFileChange}
+              ref={fileInputRef}
               className="input input-bordered w-full bg-gray-400 border-4 border-white text-white placeholder-gray-200 focus:outline-none focus:ring-2 focus:ring-rose-600"
             />
+
             {formData.photoURL && (
               <div className="mt-4">
                 <p className="text-sm text-gray-400">Preview:</p>
