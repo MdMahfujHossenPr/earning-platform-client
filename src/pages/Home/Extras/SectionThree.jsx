@@ -3,7 +3,7 @@ import { FaLock, FaHeadset, FaChartLine } from "react-icons/fa";
 
 const SectionThree = () => {
   return (
-    <section className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-950 text-white py-20 px-4">
+    <section className=" text-white py-20 px-4">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-6">✅ Why Choose Us?</h2>
         <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-12">

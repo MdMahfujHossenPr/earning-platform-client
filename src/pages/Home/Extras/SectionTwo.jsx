@@ -3,7 +3,7 @@ import { FaClipboardCheck, FaPlayCircle, FaWallet } from "react-icons/fa";
 
 const SectionTwo = () => {
   return (
-    <section className="bg-gray-950 text-white py-20 px-4">
+    <section className=" text-white py-20 px-4">
       <div className="max-w-7xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
           🛠️ How It Works

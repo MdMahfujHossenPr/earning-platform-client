@@ -30,7 +30,7 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="relative bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 py-20 px-4">
+    <section className="relative py-20 px-4">
       <div className="max-w-4xl mx-auto text-center">
         <h2 className="text-4xl md:text-5xl font-bold text-white mb-12 tracking-tight">
           💬 Hear From Our Users
