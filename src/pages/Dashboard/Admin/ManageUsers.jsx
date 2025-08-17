@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { getUsers, deleteUser, updateUserRole } from '../../../services/user.service';
+import { toast } from 'react-hot-toast';
 
 const ManageUsers = () => {
   const [users, setUsers] = useState([]);
@@ -29,10 +30,11 @@ const ManageUsers = () => {
       setLoading(true);
       try {
         await deleteUser(userId);
+        toast.success("✅ User removed successfully");
         await fetchUsers();
       } catch (err) {
         console.error("Failed to delete user:", err);
-        alert("Could not delete user. Try again.");
+        toast.error("❌ Could not delete user. Try again.");
       } finally {
         setLoading(false);
       }
@@ -43,78 +45,89 @@ const ManageUsers = () => {
     setLoading(true);
     try {
       await updateUserRole(userId, newRole);
+      toast.success(`✅ Role updated to ${newRole}`);
       await fetchUsers();
     } catch (err) {
       console.error("Failed to update user role:", err);
-      alert("Could not update role. Try again.");
+      toast.error("❌ Could not update role. Try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h2 className="text-2xl font-semibold mb-4">Manage Users</h2>
+    <div className="p-6 min-h-screen bg-gray-600 text-white">
+      <h2 className="text-3xl font-bold mb-6 text-center">Manage Users</h2>
+
       {loading ? (
-        <p>Loading...</p>
+        <div className="text-center py-10 text-xl font-medium animate-pulse">
+          Loading...
+        </div>
       ) : error ? (
-        <p className="text-red-500">{error}</p>
+        <p className="text-red-400 text-center">{error}</p>
       ) : (
-        <table className="min-w-full table-auto border border-gray-300 rounded-md">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="px-4 py-2 border-b">Display Name</th>
-              <th className="px-4 py-2 border-b">Email</th>
-              <th className="px-4 py-2 border-b">Role</th>
-              <th className="px-4 py-2 border-b">Coins</th>
-              <th className="px-4 py-2 border-b">Photo</th>
-              <th className="px-4 py-2 border-b">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <tr key={user._id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2 border-b">{user.name}</td>
-                  <td className="px-4 py-2 border-b">{user.email}</td>
-                  <td className="px-4 py-2 border-b">
-                    <select
-                      value={user.role}
-                      onChange={(e) => handleRoleChange(user._id, e.target.value)}
-                      className="bg-gray-200 text-gray-700 p-2 rounded"
-                    >
-                      <option value="Admin">Admin</option>
-                      <option value="Buyer">Buyer</option>
-                      <option value="Worker">Worker</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-2 border-b">{user.coin}</td>
-                  <td className="px-4 py-2 border-b">
-                    <img
-                      src={user.photo_url || "/default-avatar.png"}
-                      alt={user.name}
-                      className="w-12 h-12 rounded-full object-cover"
-                    />
-                  </td>
-                  <td className="px-4 py-2 border-b">
-                    <button
-                      onClick={() => handleDelete(user._id)}
-                      className="bg-red-600 text-white py-1 px-4 rounded-lg hover:bg-red-700"
-                    >
-                      Remove
-                    </button>
+        <div className="overflow-x-auto rounded-xl shadow-lg border border-gray-500 bg-gray-700/50 backdrop-blur-md">
+          <table className="min-w-full text-left">
+            <thead>
+              <tr className="bg-gray-800/90 text-white text-sm uppercase">
+                <th className="px-6 py-3">Display Name</th>
+                <th className="px-6 py-3">Email</th>
+                <th className="px-6 py-3">Role</th>
+                <th className="px-6 py-3">Coins</th>
+                <th className="px-6 py-3">Photo</th>
+                <th className="px-6 py-3">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length > 0 ? (
+                users.map((user, index) => (
+                  <tr
+                    key={user._id}
+                    className={`border-t ${
+                      index % 2 === 0 ? 'bg-gray-700/30' : 'bg-gray-700/20'
+                    } hover:bg-gray-600/40 transition-colors`}
+                  >
+                    <td className="px-6 py-4">{user.name}</td>
+                    <td className="px-6 py-4 text-gray-200">{user.email}</td>
+                    <td className="px-6 py-4">
+                      <select
+                        value={user.role}
+                        onChange={(e) => handleRoleChange(user._id, e.target.value)}
+                        className="bg-gray-600 text-white p-2 rounded"
+                      >
+                        <option value="Admin">Admin</option>
+                        <option value="Buyer">Buyer</option>
+                        <option value="Worker">Worker</option>
+                      </select>
+                    </td>
+                    <td className="px-6 py-4 text-yellow-300 font-semibold">{user.coin}</td>
+                    <td className="px-6 py-4">
+                      <img
+                        src={user.photo_url || '/default-avatar.png'}
+                        alt={user.name}
+                        className="w-12 h-12 rounded-full object-cover border border-gray-400"
+                      />
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => handleDelete(user._id)}
+                        className="bg-red-600 hover:bg-red-700 text-white py-1 px-4 rounded-lg transition"
+                      >
+                        Remove
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="text-center py-6 text-gray-400">
+                    No users found.
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={6} className="text-center py-4 text-gray-500">
-                  No users found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
