@@ -144,14 +144,6 @@ const Sidebar = () => {
                 <FaCoins /> <span className="text-xl">Withdraw Requests</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/dashboard/settings"
-                className="flex items-center gap-3 hover:bg-gray-700 p-3 rounded-md transition-all duration-300 text-lg"
-              >
-                <FaCog /> <span className="text-xl">Settings</span>
-              </Link>
-            </li>
           </>
         )}
 

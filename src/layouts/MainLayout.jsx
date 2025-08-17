@@ -4,7 +4,7 @@ import Footer from "../components/Footer/Footer.jsx";
 
 const MainLayout = () => {
   return (
-    <div className="min-h-screen bg-gray-600">
+    <div className="min-h-screen bg-gray-800">
       {/* Navigation bar */}
       <Navbar />
 

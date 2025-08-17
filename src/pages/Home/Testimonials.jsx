@@ -1,8 +1,6 @@
 import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/autoplay";
+import { motion } from "framer-motion";
+import { FaQuoteLeft } from "react-icons/fa";
 
 const testimonials = [
   {
@@ -30,37 +28,50 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="relative py-20 px-4">
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-12 tracking-tight">
-          💬 Hear From Our Users
-        </h2>
-
-        <Swiper
-          modules={[Autoplay]}
-          spaceBetween={30}
-          slidesPerView={1}
-          loop={true}
-          autoplay={{ delay: 4000, disableOnInteraction: false }}
+    <section className="relative py-24 px-4 ">
+      <div className="max-w-6xl mx-auto">
+        <motion.h2
+          className="text-4xl md:text-5xl font-bold text-white mb-20 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
         >
-          {testimonials.map((t) => (
-            <SwiperSlide key={t.id}>
-              <div className="bg-white/5 backdrop-blur-md p-8 md:p-10 rounded-3xl border border-white/10 shadow-2xl text-white transition-all duration-500 hover:scale-[1.015]">
-                <img
-                  src={t.image}
-                  alt={t.name}
-                  className="w-24 h-24 rounded-full border-4 border-blue-500 mx-auto object-cover shadow-md"
-                />
-                <p className="mt-6 text-lg italic leading-relaxed max-w-2xl mx-auto">
-                  “{t.message}”
-                </p>
-                <p className="mt-4 text-xl font-semibold text-blue-400">
-                  — {t.name}
-                </p>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
+          💬 Hear From Our Users
+        </motion.h2>
+
+        <div className="relative before:absolute before:top-0 before:bottom-0 before:left-1/2 before:w-1 before:bg-gray-700 before:-translate-x-1/2">
+          {testimonials.map((t, index) => {
+            const isLeft = index % 2 === 0;
+            return (
+              <motion.div
+                key={t.id}
+                className={`mb-16 flex flex-col md:flex-row items-center md:justify-${isLeft ? "start" : "end"} w-full`}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <div
+                  className={`bg-gray-800 text-white p-8 border-2 border-white rounded-xl shadow-lg w-full md:w-5/12 relative ${
+                    isLeft ? "md:mr-auto md:text-left" : "md:ml-auto md:text-right"
+                  }`}
+                >
+                  <FaQuoteLeft className="text-3xl text-gray-400 mb-4" />
+                  <p className="text-lg italic leading-relaxed">{t.message}</p>
+                  <div className="mt-4 flex items-center space-x-4 justify-start md:justify-end">
+                    <img
+                      src={t.image}
+                      alt={t.name}
+                      className="w-14 h-14 rounded-full border-2 border-white object-cover"
+                    />
+                    <span className="font-semibold text-gray-100">{t.name}</span>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
