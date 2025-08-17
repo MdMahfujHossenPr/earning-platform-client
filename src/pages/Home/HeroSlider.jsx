@@ -20,7 +20,7 @@ const HeroSlider = () => {
           <div
             className="h-full bg-cover bg-center"
             style={{
-              backgroundImage: "url(https://i.ibb.co/Kx3tcHFw/Banner1.jpg)",
+              backgroundImage: "url(https://i.ibb.co.com/ZRxK8VQY/Banner2.jpg)",
             }}
           >
             <div className="flex items-center justify-center h-full bg-black/50 px-4">
@@ -41,7 +41,7 @@ const HeroSlider = () => {
           <div
             className="h-full bg-cover bg-center"
             style={{
-              backgroundImage: "url(https://i.ibb.co/sJFVSBbp/Banner3.jpg)",
+              backgroundImage: "url(https://i.ibb.co.com/QjNm55YF/Banner3.jpg)",
             }}
           >
             <div className="flex items-center justify-center h-full bg-black/50 px-4">
@@ -62,7 +62,7 @@ const HeroSlider = () => {
           <div
             className="h-full bg-cover bg-center"
             style={{
-              backgroundImage: "url(https://i.ibb.co/93pj1Mr6/Banner2.png)",
+              backgroundImage: "url(https://i.ibb.co.com/9HcPjQ26/Banner4.jpg)",
             }}
           >
             <div className="flex items-center justify-center h-full bg-black/50 px-4">
